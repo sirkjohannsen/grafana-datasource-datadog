@@ -1,0 +1,35 @@
+<datasource-http-settings
+    current="ctrl.current"
+    suggest-url="https://app.datadoghq.com/api/v1">
+</datasource-http-settings>
+
+<div class="gf-form-group">
+  <h3 class="page-heading">DataDog settings</h3>
+  <p>You can manage your account's API and application keys <a href="https://app.datadoghq.com/account/settings#api">here</a>.</p>
+  <div class="gf-form-group">
+    <div class="gf-form-inline">
+      <div class="gf-form max-width-30">
+        <span class="gf-form-label width-7">API Key</span>
+        <input class="gf-form-input" type="text"
+              ng-model='ctrl.current.jsonData.api_key' min-length="0"
+              required></input>
+        <info-popover mode="right-absolute">
+          <p>Specify your datadog API Key</p>
+        </info-popover>
+      </div>
+    </div>
+
+    <div class="gf-form-inline">
+      <div class="gf-form max-width-30">
+        <span class="gf-form-label width-7">APP Key</span>
+        <input class="gf-form-input" type="text"
+              ng-model='ctrl.current.jsonData.app_key' min-length="0"
+              required></input>
+        <info-popover mode="right-absolute">
+          <p>Specify your datadog APP Key</p>
+        </info-popover>
+      </div>
+    </div>
+  </div>
+</div>
+

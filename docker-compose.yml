@@ -1,0 +1,11 @@
+influxdb:
+  image: influxdb/influxdb:latest
+grafana:
+  image: grafana/grafana:latest
+  container_name: grafana
+  links:
+    - influxdb
+  ports:
+    - "3000:3000"
+  volumes:
+    - ./dist:/var/lib/grafana/plugins/datadog-datasource
