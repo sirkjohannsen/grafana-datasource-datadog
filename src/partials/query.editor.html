@@ -38,6 +38,13 @@
     </div>
 
     <div class="gf-form-inline">
+      <div class="gf-form">
+        <label class="gf-form-label query-keyword width-7">POST</label>
+        <metric-segment segment="ctrl.asSegment" get-options="ctrl.getAs()" on-change="ctrl.asChanged()"></metric-segment>
+      </div>
+    </div>
+
+    <div class="gf-form-inline">
       <div class="gf-form max-width-30">
         <label class="gf-form-label query-keyword width-7">ALIAS BY</label>
         <input type="text" class="gf-form-input" ng-model="ctrl.target.alias" spellcheck='false' placeholder="Naming pattern" ng-blur="ctrl.refresh()">

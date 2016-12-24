@@ -16,8 +16,8 @@
     },
     "keywords": ["datadog"],
     "logos": {
-      "small": "img/kairosdb_logo_small.png",
-      "large": "img/kairosdb_logo_large.png"
+      "small": "img/datadog.png",
+      "large": "img/datadog.png"
     },
     "links": [
       {"name": "GitHub", "url": "https://github.com/voidfiles/datadog-datasource"},

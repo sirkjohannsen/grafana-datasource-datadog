@@ -98,6 +98,16 @@ System.register(['app/plugins/sdk'], function (_export, _context) {
 
           _this.fixTagSegments();
 
+          if (_this.target.as) {
+            _this.asSegment = uiSegmentSrv.newSegment(_this.target.as);
+          } else {
+            _this.asSegment = uiSegmentSrv.newSegment({
+              value: 'Select As',
+              fake: true,
+              custom: false
+            });
+          }
+
           return _this;
         }
 
@@ -113,6 +123,10 @@ System.register(['app/plugins/sdk'], function (_export, _context) {
             } else {
               this.target.query += '{' + this.target.tags.join(',') + '}';
             }
+
+            if (this.target.as) {
+              this.target.query += '.' + this.target.as + '()';i;
+            }
           }
         }, {
           key: 'getMetrics',
@@ -123,6 +137,11 @@ System.register(['app/plugins/sdk'], function (_export, _context) {
           key: 'getAggregations',
           value: function getAggregations() {
             return this.$q.when([{ text: 'avg by', value: 'avg' }, { text: 'max by', value: 'max' }, { text: 'min by', value: 'min' }, { text: 'sub by', value: 'sum' }]);
+          }
+        }, {
+          key: 'getAs',
+          value: function getAs() {
+            return this.$q.when([{ text: 'None', value: 'None' }, { text: 'as_count', value: 'as_count' }, { text: 'as_rate', value: 'as_rate' }]);
           }
         }, {
           key: 'getTags',
@@ -155,6 +174,17 @@ System.register(['app/plugins/sdk'], function (_export, _context) {
           key: 'metricChanged',
           value: function metricChanged() {
             this.target.metric = this.metricSegment.value;
+            this.setQuery();
+            this.panelCtrl.refresh();
+          }
+        }, {
+          key: 'asChanged',
+          value: function asChanged() {
+            if (this.asSegment.value == 'None') {
+              this.target.as = null;
+            } else {
+              this.target.as = this.asSegment.value;
+            }
             this.setQuery();
             this.panelCtrl.refresh();
           }

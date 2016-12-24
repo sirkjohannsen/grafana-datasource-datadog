@@ -41,6 +41,16 @@ export class DataDogQueryCtrl extends QueryCtrl {
 
       this.fixTagSegments();
 
+      if (this.target.as) {
+        this.asSegment = uiSegmentSrv.newSegment(this.target.as);
+      } else {
+        this.asSegment = uiSegmentSrv.newSegment({
+          value: 'Select As',
+          fake: true,
+          custom: false,
+        });
+      }
+
     }
 
     setQuery() {
@@ -52,6 +62,10 @@ export class DataDogQueryCtrl extends QueryCtrl {
         this.target.query += '{*}';
       } else {
         this.target.query += '{' + this.target.tags.join(',') + '}';
+      }
+
+      if (this.target.as) {
+        this.target.query += '.' + this.target.as + '()';i
       }
     }
 
@@ -65,6 +79,14 @@ export class DataDogQueryCtrl extends QueryCtrl {
         {text: 'max by', value: 'max'},
         {text: 'min by', value: 'min'},
         {text: 'sub by', value: 'sum'},
+      ]);
+    }
+
+    getAs() {
+      return this.$q.when([
+        {text: 'None', value: 'None'},
+        {text: 'as_count', value: 'as_count'},
+        {text: 'as_rate', value: 'as_rate'},
       ]);
     }
 
@@ -95,6 +117,16 @@ export class DataDogQueryCtrl extends QueryCtrl {
 
     metricChanged() {
       this.target.metric = this.metricSegment.value;
+      this.setQuery();
+      this.panelCtrl.refresh();
+    }
+
+    asChanged() {
+      if (this.asSegment.value == 'None') {
+        this.target.as = null;
+      } else {
+        this.target.as = this.asSegment.value;
+      }
       this.setQuery();
       this.panelCtrl.refresh();
     }
