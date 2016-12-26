@@ -14,7 +14,7 @@
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/voidfiles/datadog-datasource/issues"
+    "url": "https://github.com/voidfiles/grafana-datasource-datagog/issues"
   },
   "devDependencies": {
     "babel": "~6.5.1",
@@ -40,5 +40,5 @@
     "lodash": "~4.0.0",
     "mocha": "^2.4.5"
   },
-  "homepage": "https://github.com/voidfiles/datadog-datasource#readme"
+  "homepage": "https://github.com/voidfiles/grafana-datasource-datagog/issues"
 }
