@@ -7,14 +7,19 @@ exports.DataDogQueryCtrl = undefined;
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
+var _lodash = require('lodash');
+
+var _lodash2 = _interopRequireDefault(_lodash);
+
 var _sdk = require('app/plugins/sdk');
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; } //import _ from 'lodash';
-
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 var DataDogQueryCtrl = exports.DataDogQueryCtrl = function (_QueryCtrl) {
   _inherits(DataDogQueryCtrl, _QueryCtrl);
@@ -50,7 +55,7 @@ var DataDogQueryCtrl = exports.DataDogQueryCtrl = function (_QueryCtrl) {
     _this.tagSegments = [];
     var self = _this;
     _this.target.tags = _this.target.tags || [];
-    _.map(_this.target.tags, function (tag) {
+    _lodash2.default.map(_this.target.tags, function (tag) {
       self.tagSegments.push(uiSegmentSrv.newSegment(tag));
     });
 
@@ -83,7 +88,7 @@ var DataDogQueryCtrl = exports.DataDogQueryCtrl = function (_QueryCtrl) {
       }
 
       if (this.target.as) {
-        this.target.query += '.' + this.target.as + '()';i;
+        this.target.query += '.' + this.target.as + '()'; //i
       }
     }
   }, {
@@ -109,7 +114,7 @@ var DataDogQueryCtrl = exports.DataDogQueryCtrl = function (_QueryCtrl) {
         var first = results && results[0];
         var resultsHaveRemoveText = first && first.text === self.removeText;
         var segmentIsPlusButton = segment.type === 'plus-button';
-        var removeResultsText = resultsHaveRemoveText && segmentIsPlusButton;
+        // var removeResultsText = resultsHaveRemoveText && segmentIsPlusButton;
         if (resultsHaveRemoveText) {
           results.splice(0, 1);
         }
@@ -138,7 +143,7 @@ var DataDogQueryCtrl = exports.DataDogQueryCtrl = function (_QueryCtrl) {
   }, {
     key: 'asChanged',
     value: function asChanged() {
-      if (this.asSegment.value == 'None') {
+      if (this.asSegment.value === 'None') {
         this.target.as = null;
       } else {
         this.target.as = this.asSegment.value;
@@ -163,7 +168,7 @@ var DataDogQueryCtrl = exports.DataDogQueryCtrl = function (_QueryCtrl) {
         this.tagSegments.splice(index, 1);
       }
       console.log("target segments", this.tagSegments);
-      this.target.tags = _.filter(_.map(this.tagSegments, function (segment) {
+      this.target.tags = _lodash2.default.filter(_lodash2.default.map(this.tagSegments, function (segment) {
         return segment.value;
       }));
       console.log("setting target tags", this.target.tags);

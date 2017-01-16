@@ -15,14 +15,12 @@ var DataDogConfigCtrl = function DataDogConfigCtrl() {
   _classCallCheck(this, DataDogConfigCtrl);
 };
 
-;
 DataDogConfigCtrl.templateUrl = "partials/config.html";
 
 var DataDogQueryOptionsCtrl = function DataDogQueryOptionsCtrl() {
   _classCallCheck(this, DataDogQueryOptionsCtrl);
 };
 
-;
 DataDogQueryOptionsCtrl.templateUrl = "partials/query.options.html";
 
 exports.Datasource = _datasource.DataDogDatasource;

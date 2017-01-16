@@ -45,25 +45,24 @@ export class DataDogDatasource {
     }
     var self = this;
     this.fetching_tags = this.backendSrv.datasourceRequest({
-        url: self.url + '/tags/hosts',
-        method: 'GET',
-        params: {
-          api_key: self.api_key,
-          application_key: self.application_key,
-        }
+      url: self.url + '/tags/hosts',
+      method: 'GET',
+      params: {
+        api_key: self.api_key,
+        application_key: self.application_key,
+      }
     }).then(function(response) {
-        self._cached_tags = _.map(response.data.tags, function (hosts, tag) {
-          return {
-            text: tag,
-            value: tag,
-          };
-        });
+      self._cached_tags = _.map(response.data.tags, function (hosts, tag) {
+        return {
+          text: tag,
+          value: tag,
+        };
+      });
 
-        return self._cached_tags;
+      return self._cached_tags;
     });
 
     return this.fetching_tags;
-
   }
 
   metricFindQuery() {
@@ -81,27 +80,26 @@ export class DataDogDatasource {
     var self = this;
 
     this.fetching = this.backendSrv.datasourceRequest({
-        url: self.url + '/metrics',
-        method: 'GET',
-        params: {
-          api_key: self.api_key,
-          application_key: self.application_key,
-          from: from
-        }
+      url: self.url + '/metrics',
+      method: 'GET',
+      params: {
+        api_key: self.api_key,
+        application_key: self.application_key,
+        from: from
+      }
     }).then(function(response) {
-        self._cached_metrics = _.map(response.data.metrics, function (metric) {
-          return {
-            text: metric,
-            value: metric,
-          };
-        });
+      self._cached_metrics = _.map(response.data.metrics, function (metric) {
+        return {
+          text: metric,
+          value: metric,
+        };
+      });
 
-        return self._cached_metrics;
+      return self._cached_metrics;
     });
 
     return this.fetching;
   }
-
 
   query(options) {
     var from = Math.floor(options.range.from.valueOf() / 1000);
@@ -143,5 +141,4 @@ export class DataDogDatasource {
       return {data: dataResponse};
     });
   }
-
 }

@@ -22,14 +22,12 @@ System.register(['./datasource', './query_ctrl'], function (_export, _context) {
         _classCallCheck(this, DataDogConfigCtrl);
       });
 
-      ;
       DataDogConfigCtrl.templateUrl = "partials/config.html";
 
       _export('QueryOptionsCtrl', DataDogQueryOptionsCtrl = function DataDogQueryOptionsCtrl() {
         _classCallCheck(this, DataDogQueryOptionsCtrl);
       });
 
-      ;
       DataDogQueryOptionsCtrl.templateUrl = "partials/query.options.html";
 
       _export('Datasource', DataDogDatasource);
