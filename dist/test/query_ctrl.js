@@ -75,6 +75,11 @@ var DataDogQueryCtrl = exports.DataDogQueryCtrl = function (_QueryCtrl) {
   }
 
   _createClass(DataDogQueryCtrl, [{
+    key: 'toggleEditorMode',
+    value: function toggleEditorMode() {
+      this.target.rawQuery = !this.target.rawQuery;
+    }
+  }, {
     key: 'setQuery',
     value: function setQuery() {
       this.target.query = this.aggregationSegment.value;

@@ -53,6 +53,10 @@ export class DataDogQueryCtrl extends QueryCtrl {
 
   }
 
+  toggleEditorMode() {
+    this.target.rawQuery = !this.target.rawQuery;
+  }
+
   setQuery() {
     this.target.query = this.aggregationSegment.value;
     if (! this.metricSegment.fake) {

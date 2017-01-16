@@ -114,6 +114,11 @@ System.register(['lodash', 'app/plugins/sdk'], function (_export, _context) {
         }
 
         _createClass(DataDogQueryCtrl, [{
+          key: 'toggleEditorMode',
+          value: function toggleEditorMode() {
+            this.target.rawQuery = !this.target.rawQuery;
+          }
+        }, {
           key: 'setQuery',
           value: function setQuery() {
             this.target.query = this.aggregationSegment.value;
