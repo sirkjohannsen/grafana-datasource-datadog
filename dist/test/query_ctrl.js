@@ -93,7 +93,7 @@ var DataDogQueryCtrl = exports.DataDogQueryCtrl = function (_QueryCtrl) {
       }
 
       if (this.target.as) {
-        this.target.query += '.' + this.target.as + '()'; //i
+        this.target.query += '.' + this.target.as + '()';
       }
     }
   }, {

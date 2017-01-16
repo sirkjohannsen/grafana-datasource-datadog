@@ -76,30 +76,32 @@ System.register(['lodash'], function (_export, _context) {
         }, {
           key: 'metricFindTags',
           value: function metricFindTags() {
-            if (this._cached_tags) {
+            var _this = this;
+
+            if (this._cached_tags && this._cached_tags.length) {
               return this.q.when(this._cached_tags);
             }
 
             if (this.fetching_tags) {
               return this.fetching_tags;
             }
-            var self = this;
+
             this.fetching_tags = this.backendSrv.datasourceRequest({
-              url: self.url + '/tags/hosts',
+              url: this.url + '/tags/hosts',
               method: 'GET',
               params: {
-                api_key: self.api_key,
-                application_key: self.application_key
+                api_key: this.api_key,
+                application_key: this.application_key
               }
             }).then(function (response) {
-              self._cached_tags = _.map(response.data.tags, function (hosts, tag) {
+              _this._cached_tags = _.map(response.data.tags, function (hosts, tag) {
                 return {
                   text: tag,
                   value: tag
                 };
               });
 
-              return self._cached_tags;
+              return _this._cached_tags;
             });
 
             return this.fetching_tags;

@@ -132,7 +132,7 @@ System.register(['lodash', 'app/plugins/sdk'], function (_export, _context) {
             }
 
             if (this.target.as) {
-              this.target.query += '.' + this.target.as + '()'; //i
+              this.target.query += '.' + this.target.as + '()';
             }
           }
         }, {

@@ -69,7 +69,7 @@ export class DataDogQueryCtrl extends QueryCtrl {
     }
 
     if (this.target.as) {
-      this.target.query += '.' + this.target.as + '()'; //i
+      this.target.query += '.' + this.target.as + '()';
     }
   }
 
