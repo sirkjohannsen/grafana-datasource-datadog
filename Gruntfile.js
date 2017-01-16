@@ -69,6 +69,29 @@ module.exports = function(grunt) {
       }
     },
 
+    jshint: {
+      source: {
+        files: {
+          src: ['src/**/*.js'],
+        }
+      },
+      options: {
+        jshintrc: true,
+        reporter: require('jshint-stylish'),
+        ignores: [
+          'node_modules/*',
+          'dist/*',
+        ]
+      }
+    },
+
+    jscs: {
+      src: ['src/**/*.js'],
+      options: {
+        config: ".jscs.json",
+      },
+    },
+
     mochaTest: {
       test: {
         options: {
@@ -80,7 +103,14 @@ module.exports = function(grunt) {
 
   });
 
-  grunt.registerTask('default', ['copy:src_to_dist', 'copy:pluginDef', 'babel']);
+  grunt.registerTask('default', [
+    'copy:src_to_dist',
+    'copy:pluginDef',
+    'jshint',
+    'jscs',
+    'babel'
+  ]);
+
   grunt.registerTask('dev', ['default', 'watch']);
 
   grunt.registerTask('watchTask', [
