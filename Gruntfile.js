@@ -27,7 +27,7 @@ module.exports = function(grunt) {
     watch: {
       rebuild_all: {
         files: ['src/**/*'],
-        tasks: ['default'],
+        tasks: ['watchTask'],
         options: {spawn: false}
       }
     },
@@ -69,11 +69,6 @@ module.exports = function(grunt) {
       }
     },
 
-    watch: {
-      files: ['src/**/*'],
-      tasks: ['copy:src_to_dist', 'copy:pluginDef', 'babel']
-    },
-
     mochaTest: {
       test: {
         options: {
@@ -87,4 +82,13 @@ module.exports = function(grunt) {
 
   grunt.registerTask('default', ['copy:src_to_dist', 'copy:pluginDef', 'babel']);
   grunt.registerTask('dev', ['default', 'watch']);
+
+  grunt.registerTask('watchTask', [
+    'clean',
+    'copy:src_to_dist',
+    'copy:pluginDef',
+    'babel',
+    'jshint',
+    'jscs'
+  ]);
 };
