@@ -27,7 +27,7 @@ module.exports = function(grunt) {
     watch: {
       rebuild_all: {
         files: ['src/**/*'],
-        tasks: ['default'],
+        tasks: ['watchTask'],
         options: {spawn: false}
       }
     },
@@ -69,9 +69,27 @@ module.exports = function(grunt) {
       }
     },
 
-    watch: {
-      files: ['src/**/*'],
-      tasks: ['copy:src_to_dist', 'copy:pluginDef', 'babel']
+    jshint: {
+      source: {
+        files: {
+          src: ['src/**/*.js'],
+        }
+      },
+      options: {
+        jshintrc: true,
+        reporter: require('jshint-stylish'),
+        ignores: [
+          'node_modules/*',
+          'dist/*',
+        ]
+      }
+    },
+
+    jscs: {
+      src: ['src/**/*.js'],
+      options: {
+        config: ".jscs.json",
+      },
     },
 
     mochaTest: {
@@ -85,6 +103,22 @@ module.exports = function(grunt) {
 
   });
 
-  grunt.registerTask('default', ['copy:src_to_dist', 'copy:pluginDef', 'babel']);
+  grunt.registerTask('default', [
+    'copy:src_to_dist',
+    'copy:pluginDef',
+    'jshint',
+    'jscs',
+    'babel'
+  ]);
+
   grunt.registerTask('dev', ['default', 'watch']);
+
+  grunt.registerTask('watchTask', [
+    'clean',
+    'copy:src_to_dist',
+    'copy:pluginDef',
+    'babel',
+    'jshint',
+    'jscs'
+  ]);
 };

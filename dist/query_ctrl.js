@@ -1,9 +1,9 @@
 'use strict';
 
-System.register(['app/plugins/sdk'], function (_export, _context) {
+System.register(['lodash', 'app/plugins/sdk'], function (_export, _context) {
   "use strict";
 
-  var QueryCtrl, _createClass, DataDogQueryCtrl;
+  var _, QueryCtrl, _createClass, DataDogQueryCtrl;
 
   function _classCallCheck(instance, Constructor) {
     if (!(instance instanceof Constructor)) {
@@ -36,7 +36,9 @@ System.register(['app/plugins/sdk'], function (_export, _context) {
   }
 
   return {
-    setters: [function (_appPluginsSdk) {
+    setters: [function (_lodash) {
+      _ = _lodash.default;
+    }, function (_appPluginsSdk) {
       QueryCtrl = _appPluginsSdk.QueryCtrl;
     }],
     execute: function () {
@@ -112,6 +114,11 @@ System.register(['app/plugins/sdk'], function (_export, _context) {
         }
 
         _createClass(DataDogQueryCtrl, [{
+          key: 'toggleEditorMode',
+          value: function toggleEditorMode() {
+            this.target.rawQuery = !this.target.rawQuery;
+          }
+        }, {
           key: 'setQuery',
           value: function setQuery() {
             this.target.query = this.aggregationSegment.value;
@@ -125,7 +132,7 @@ System.register(['app/plugins/sdk'], function (_export, _context) {
             }
 
             if (this.target.as) {
-              this.target.query += '.' + this.target.as + '()';i;
+              this.target.query += '.' + this.target.as + '()';
             }
           }
         }, {
@@ -151,7 +158,7 @@ System.register(['app/plugins/sdk'], function (_export, _context) {
               var first = results && results[0];
               var resultsHaveRemoveText = first && first.text === self.removeText;
               var segmentIsPlusButton = segment.type === 'plus-button';
-              var removeResultsText = resultsHaveRemoveText && segmentIsPlusButton;
+              // var removeResultsText = resultsHaveRemoveText && segmentIsPlusButton;
               if (resultsHaveRemoveText) {
                 results.splice(0, 1);
               }
@@ -180,7 +187,7 @@ System.register(['app/plugins/sdk'], function (_export, _context) {
         }, {
           key: 'asChanged',
           value: function asChanged() {
-            if (this.asSegment.value == 'None') {
+            if (this.asSegment.value === 'None') {
               this.target.as = null;
             } else {
               this.target.as = this.asSegment.value;
