@@ -97,7 +97,10 @@ module.exports = function(grunt) {
         options: {
           reporter: 'spec'
         },
-        src: ['dist/test/spec/test-main.js', 'dist/test/spec/*_spec.js']
+        src: [
+          'dist/test/spec/test-main.js',
+          'dist/test/spec/*_spec.js'
+        ]
       }
     }
 
@@ -108,7 +111,8 @@ module.exports = function(grunt) {
     'copy:pluginDef',
     'jshint',
     'jscs',
-    'babel'
+    'babel',
+    'mochaTest'
   ]);
 
   grunt.registerTask('dev', ['default', 'watch']);
