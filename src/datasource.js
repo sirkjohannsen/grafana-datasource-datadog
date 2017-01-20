@@ -21,15 +21,20 @@ export class DataDogDatasource {
     .then(() => {
       return {
         status: "success",
-        message: "Data source is working",
         title: "Success",
+        message: "Data source is working"
       };
     })
-    .catch(() => {
+    .catch(error => {
+      var message = "Connection error";
+      if (error && error.message) {
+        message = error.message;
+      }
+
       return {
         status: "error",
-        message: "Connection error",
-        title: "Error"
+        title: "Error",
+        message: message
       };
     });
   }
@@ -134,17 +139,20 @@ export class DataDogDatasource {
     })
     .then(response => {
       if (response.data) {
-        console.log(response.data);
         return response.data;
       } else {
         throw {message: 'DataDog API request error'};
       }
     })
     .catch(error => {
-      if (error.err.statusText) {
+      var message = 'DataDog API request error';
+      if (error.statusText) {
+        message = error.status + ' ' + error.statusText;
+        throw {message: message};
+      } else if (error.err.statusText) {
         throw {message: error.err.statusText};
       } else {
-        throw {message: 'DataDog API request error'};
+        throw {message: message};
       }
     });
   }

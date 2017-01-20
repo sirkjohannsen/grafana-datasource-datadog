@@ -59,14 +59,19 @@ System.register(['lodash'], function (_export, _context) {
             return this.invokeDataDogApiRequest('/downtime').then(function () {
               return {
                 status: "success",
-                message: "Data source is working",
-                title: "Success"
+                title: "Success",
+                message: "Data source is working"
               };
-            }).catch(function () {
+            }).catch(function (error) {
+              var message = "Connection error";
+              if (error && error.message) {
+                message = error.message;
+              }
+
               return {
                 status: "error",
-                message: "Connection error",
-                title: "Error"
+                title: "Error",
+                message: message
               };
             });
           }
@@ -179,16 +184,19 @@ System.register(['lodash'], function (_export, _context) {
               params: params
             }).then(function (response) {
               if (response.data) {
-                console.log(response.data);
                 return response.data;
               } else {
                 throw { message: 'DataDog API request error' };
               }
             }).catch(function (error) {
-              if (error.err.statusText) {
+              var message = 'DataDog API request error';
+              if (error.statusText) {
+                message = error.status + ' ' + error.statusText;
+                throw { message: message };
+              } else if (error.err.statusText) {
                 throw { message: error.err.statusText };
               } else {
-                throw { message: 'DataDog API request error' };
+                throw { message: message };
               }
             });
           }
