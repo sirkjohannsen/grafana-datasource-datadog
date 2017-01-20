@@ -181,7 +181,11 @@ System.register(['lodash'], function (_export, _context) {
                 throw { message: 'DataDog API request error' };
               }
             }).catch(function (error) {
-              throw { message: error };
+              if (error.err.statusText) {
+                throw { message: error.err.statusText };
+              } else {
+                throw { message: 'DataDog API request error' };
+              }
             });
           }
         }]);
