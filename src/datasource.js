@@ -127,6 +127,40 @@ export class DataDogDatasource {
     });
   }
 
+  annotationQuery(options) {
+    console.log(options);
+    let timeFrom = Math.floor(options.range.from.valueOf() / 1000);
+    let timeTo = Math.floor(options.range.to.valueOf() / 1000);
+    return this.getEventStream(timeFrom, timeTo)
+    .then(events => {
+      console.log(events);
+      return events.map(event => {
+        return {
+          annotation: options.annotation,
+          time: event.date_happened * 1000,
+          title: event.title,
+          text: event.text
+        };
+      });
+    });
+  }
+
+  getEventStream(timeFrom, timeTo) {
+    let params = {
+      start: timeFrom,
+      end: timeTo
+    };
+
+    return this.invokeDataDogApiRequest('/events', params)
+    .then(result => {
+      if (result.events) {
+        return result.events;
+      } else {
+        return [];
+      }
+    });
+  }
+
   invokeDataDogApiRequest(url, params = {}) {
     // Set auth params
     params.api_key = this.api_key;

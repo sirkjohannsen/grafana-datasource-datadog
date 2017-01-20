@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.QueryOptionsCtrl = exports.ConfigCtrl = exports.QueryCtrl = exports.Datasource = undefined;
+exports.AnnotationsQueryCtrl = exports.QueryOptionsCtrl = exports.ConfigCtrl = exports.QueryCtrl = exports.Datasource = undefined;
 
 var _datasource = require('./datasource');
 
@@ -23,8 +23,15 @@ var DataDogQueryOptionsCtrl = function DataDogQueryOptionsCtrl() {
 
 DataDogQueryOptionsCtrl.templateUrl = "partials/query.options.html";
 
+var DataDogAnnotationsQueryCtrl = function DataDogAnnotationsQueryCtrl() {
+  _classCallCheck(this, DataDogAnnotationsQueryCtrl);
+};
+
+DataDogAnnotationsQueryCtrl.templateUrl = 'partials/annotations.editor.html';
+
 exports.Datasource = _datasource.DataDogDatasource;
 exports.QueryCtrl = _query_ctrl.DataDogQueryCtrl;
 exports.ConfigCtrl = DataDogConfigCtrl;
 exports.QueryOptionsCtrl = DataDogQueryOptionsCtrl;
+exports.AnnotationsQueryCtrl = DataDogAnnotationsQueryCtrl;
 //# sourceMappingURL=module.js.map
