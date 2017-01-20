@@ -37,14 +37,7 @@ var DataDogDatasource = exports.DataDogDatasource = function () {
   _createClass(DataDogDatasource, [{
     key: 'testDatasource',
     value: function testDatasource() {
-      return this.backendSrv.datasourceRequest({
-        url: this.url + '/downtime',
-        method: 'GET',
-        params: {
-          api_key: this.api_key,
-          application_key: this.application_key
-        }
-      }).then(function (response) {
+      return this.invokeDataDogApiRequest('/downtime').then(function (response) {
         if (response.status === 200) {
           return {
             status: "success",
@@ -60,22 +53,15 @@ var DataDogDatasource = exports.DataDogDatasource = function () {
       var _this = this;
 
       if (this._cached_tags && this._cached_tags.length) {
-        return this.q.when(this._cached_tags);
+        return Promise.resolve(this._cached_tags);
       }
 
       if (this.fetching_tags) {
         return this.fetching_tags;
       }
 
-      this.fetching_tags = this.backendSrv.datasourceRequest({
-        url: this.url + '/tags/hosts',
-        method: 'GET',
-        params: {
-          api_key: this.api_key,
-          application_key: this.application_key
-        }
-      }).then(function (response) {
-        _this._cached_tags = _lodash2.default.map(response.data.tags, function (hosts, tag) {
+      this.fetching_tags = this.invokeDataDogApiRequest('/tags/hosts').then(function (result) {
+        _this._cached_tags = _lodash2.default.map(result.tags, function (hosts, tag) {
           return {
             text: tag,
             value: tag
@@ -90,8 +76,10 @@ var DataDogDatasource = exports.DataDogDatasource = function () {
   }, {
     key: 'metricFindQuery',
     value: function metricFindQuery() {
+      var _this2 = this;
+
       if (this._cached_metrics) {
-        return this.q.when(this._cached_metrics);
+        return Promise.resolve(this._cached_metrics);
       }
 
       if (this.fetching) {
@@ -101,25 +89,17 @@ var DataDogDatasource = exports.DataDogDatasource = function () {
       var d = new Date();
       d.setDate(d.getDate() - 1);
       var from = Math.floor(d.getTime() / 1000);
-      var self = this;
+      var params = { from: from };
 
-      this.fetching = this.backendSrv.datasourceRequest({
-        url: self.url + '/metrics',
-        method: 'GET',
-        params: {
-          api_key: self.api_key,
-          application_key: self.application_key,
-          from: from
-        }
-      }).then(function (response) {
-        self._cached_metrics = _lodash2.default.map(response.data.metrics, function (metric) {
+      this.fetching = this.invokeDataDogApiRequest('/metrics', params).then(function (result) {
+        _this2._cached_metrics = _lodash2.default.map(result.metrics, function (metric) {
           return {
             text: metric,
             value: metric
           };
         });
 
-        return self._cached_metrics;
+        return _this2._cached_metrics;
       });
 
       return this.fetching;
@@ -141,31 +121,48 @@ var DataDogDatasource = exports.DataDogDatasource = function () {
         return val.query;
       });
       var queryString = queries.join(',');
-      var query = {
-        api_key: this.api_key,
-        application_key: this.application_key,
+      var params = {
         from: from,
         to: to,
         query: queryString
       };
 
-      return this.backendSrv.datasourceRequest({
-        url: this.url + '/query',
-        params: query,
-        method: 'GET'
-      }).then(function (response) {
-
-        var dataResponse = _lodash2.default.map(response.data.series, function (series, i) {
+      return this.invokeDataDogApiRequest('/query', params).then(function (result) {
+        var dataResponse = _lodash2.default.map(result.series, function (series, i) {
           var target = targets[i];
           return {
             'target': target.alias || series.expression,
-            'datapoints': _lodash2.default.map(series.pointlist, function (a) {
-              return [a[1], a[0]];
+            'datapoints': _lodash2.default.map(series.pointlist, function (point) {
+              return [point[1], point[0]];
             })
           };
         });
 
         return { data: dataResponse };
+      });
+    }
+  }, {
+    key: 'invokeDataDogApiRequest',
+    value: function invokeDataDogApiRequest(url) {
+      var params = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+
+      // Set auth params
+      params.api_key = this.api_key;
+      params.application_key = this.application_key;
+
+      return this.backendSrv.datasourceRequest({
+        method: 'GET',
+        url: this.url + url,
+        params: params
+      }).then(function (response) {
+        if (response.data) {
+          console.log(response.data);
+          return response.data;
+        } else {
+          throw { message: 'DataDog API request error' };
+        }
+      }).catch(function (error) {
+        throw { message: error };
       });
     }
   }]);

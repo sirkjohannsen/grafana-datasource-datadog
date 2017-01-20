@@ -17,14 +17,8 @@ export class DataDogDatasource {
 
   // Function to check Datasource health
   testDatasource() {
-    return this.backendSrv.datasourceRequest({
-      url: this.url + '/downtime',
-      method: 'GET',
-      params: {
-        api_key: this.api_key,
-        application_key: this.application_key,
-      }
-    }).then(function(response) {
+    return this.invokeDataDogApiRequest('/downtime')
+    .then(response => {
       if (response.status === 200) {
         return {
           status: "success",
@@ -37,22 +31,16 @@ export class DataDogDatasource {
 
   metricFindTags() {
     if (this._cached_tags && this._cached_tags.length) {
-      return this.q.when(this._cached_tags);
+      return Promise.resolve(this._cached_tags);
     }
 
     if (this.fetching_tags) {
       return this.fetching_tags;
     }
 
-    this.fetching_tags = this.backendSrv.datasourceRequest({
-      url: this.url + '/tags/hosts',
-      method: 'GET',
-      params: {
-        api_key: this.api_key,
-        application_key: this.application_key,
-      }
-    }).then(response => {
-      this._cached_tags = _.map(response.data.tags, (hosts, tag) => {
+    this.fetching_tags = this.invokeDataDogApiRequest('/tags/hosts')
+    .then(result => {
+      this._cached_tags = _.map(result.tags, (hosts, tag) => {
         return {
           text: tag,
           value: tag,
@@ -67,7 +55,7 @@ export class DataDogDatasource {
 
   metricFindQuery() {
     if (this._cached_metrics) {
-      return this.q.when(this._cached_metrics);
+      return Promise.resolve(this._cached_metrics);
     }
 
     if (this.fetching) {
@@ -77,25 +65,18 @@ export class DataDogDatasource {
     var d = new Date();
     d.setDate(d.getDate() - 1);
     var from = Math.floor(d.getTime() / 1000);
-    var self = this;
+    var params = { from: from };
 
-    this.fetching = this.backendSrv.datasourceRequest({
-      url: self.url + '/metrics',
-      method: 'GET',
-      params: {
-        api_key: self.api_key,
-        application_key: self.application_key,
-        from: from
-      }
-    }).then(function(response) {
-      self._cached_metrics = _.map(response.data.metrics, function (metric) {
+    this.fetching = this.invokeDataDogApiRequest('/metrics', params)
+    .then(result => {
+      this._cached_metrics = _.map(result.metrics, metric => {
         return {
           text: metric,
           value: metric,
         };
       });
 
-      return self._cached_metrics;
+      return this._cached_metrics;
     });
 
     return this.fetching;
@@ -114,31 +95,48 @@ export class DataDogDatasource {
       return val.query;
     });
     var queryString = queries.join(',');
-    var query = {
-      api_key: this.api_key,
-      application_key: this.application_key,
+    var params = {
       from: from,
       to: to,
       query: queryString,
     };
 
-    return this.backendSrv.datasourceRequest({
-      url: this.url + '/query',
-      params: query,
-      method: 'GET',
-    }).then(function (response) {
-
-      var dataResponse = _.map(response.data.series, function (series, i) {
+    return this.invokeDataDogApiRequest('/query', params)
+    .then(result => {
+      var dataResponse = _.map(result.series, (series, i) => {
         var target = targets[i];
         return {
           'target': target.alias || series.expression,
-          'datapoints': _.map(series.pointlist, function (a) {
-            return [a[1], a[0]];
+          'datapoints': _.map(series.pointlist, point => {
+            return [point[1], point[0]];
           })
         };
       });
 
       return {data: dataResponse};
+    });
+  }
+
+  invokeDataDogApiRequest(url, params = {}) {
+    // Set auth params
+    params.api_key = this.api_key;
+    params.application_key = this.application_key;
+
+    return this.backendSrv.datasourceRequest({
+      method: 'GET',
+      url: this.url + url,
+      params: params
+    })
+    .then(response => {
+      if (response.data) {
+        console.log(response.data);
+        return response.data;
+      } else {
+        throw {message: 'DataDog API request error'};
+      }
+    })
+    .catch(error => {
+      throw {message: error};
     });
   }
 }
