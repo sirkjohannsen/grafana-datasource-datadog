@@ -18,14 +18,19 @@ export class DataDogDatasource {
   // Function to check Datasource health
   testDatasource() {
     return this.invokeDataDogApiRequest('/downtime')
-    .then(response => {
-      if (response.status === 200) {
-        return {
-          status: "success",
-          message: "Data source is working",
-          title: "Success",
-        };
-      }
+    .then(() => {
+      return {
+        status: "success",
+        message: "Data source is working",
+        title: "Success",
+      };
+    })
+    .catch(() => {
+      return {
+        status: "error",
+        message: "Connection error",
+        title: "Error"
+      };
     });
   }
 

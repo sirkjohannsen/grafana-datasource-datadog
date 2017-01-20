@@ -37,14 +37,18 @@ var DataDogDatasource = exports.DataDogDatasource = function () {
   _createClass(DataDogDatasource, [{
     key: 'testDatasource',
     value: function testDatasource() {
-      return this.invokeDataDogApiRequest('/downtime').then(function (response) {
-        if (response.status === 200) {
-          return {
-            status: "success",
-            message: "Data source is working",
-            title: "Success"
-          };
-        }
+      return this.invokeDataDogApiRequest('/downtime').then(function () {
+        return {
+          status: "success",
+          message: "Data source is working",
+          title: "Success"
+        };
+      }).catch(function () {
+        return {
+          status: "error",
+          message: "Connection error",
+          title: "Error"
+        };
       });
     }
   }, {
