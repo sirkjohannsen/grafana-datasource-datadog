@@ -187,6 +187,11 @@ var DataDogQueryCtrl = exports.DataDogQueryCtrl = function (_QueryCtrl) {
         this.tagSegments.push(this.uiSegmentSrv.newPlusButton());
       }
     }
+  }, {
+    key: 'getCollapsedText',
+    value: function getCollapsedText() {
+      return this.target.query;
+    }
   }]);
 
   return DataDogQueryCtrl;
