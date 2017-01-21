@@ -162,7 +162,10 @@ export class DataDogQueryCtrl extends QueryCtrl {
     if (!lastSegment || lastSegment.type !== 'plus-button') {
       this.tagSegments.push(this.uiSegmentSrv.newPlusButton());
     }
+  }
 
+  getCollapsedText() {
+    return this.target.query;
   }
 }
 

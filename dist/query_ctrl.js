@@ -226,6 +226,11 @@ System.register(['lodash', 'app/plugins/sdk'], function (_export, _context) {
               this.tagSegments.push(this.uiSegmentSrv.newPlusButton());
             }
           }
+        }, {
+          key: 'getCollapsedText',
+          value: function getCollapsedText() {
+            return this.target.query;
+          }
         }]);
 
         return DataDogQueryCtrl;
