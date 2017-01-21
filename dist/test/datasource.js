@@ -151,6 +151,40 @@ var DataDogDatasource = exports.DataDogDatasource = function () {
       });
     }
   }, {
+    key: 'annotationQuery',
+    value: function annotationQuery(options) {
+      console.log(options);
+      var timeFrom = Math.floor(options.range.from.valueOf() / 1000);
+      var timeTo = Math.floor(options.range.to.valueOf() / 1000);
+      return this.getEventStream(timeFrom, timeTo).then(function (events) {
+        console.log(events);
+        return events.map(function (event) {
+          return {
+            annotation: options.annotation,
+            time: event.date_happened * 1000,
+            title: event.title,
+            text: event.text
+          };
+        });
+      });
+    }
+  }, {
+    key: 'getEventStream',
+    value: function getEventStream(timeFrom, timeTo) {
+      var params = {
+        start: timeFrom,
+        end: timeTo
+      };
+
+      return this.invokeDataDogApiRequest('/events', params).then(function (result) {
+        if (result.events) {
+          return result.events;
+        } else {
+          return [];
+        }
+      });
+    }
+  }, {
     key: 'invokeDataDogApiRequest',
     value: function invokeDataDogApiRequest(url) {
       var params = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};

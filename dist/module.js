@@ -3,7 +3,7 @@
 System.register(['./datasource', './query_ctrl'], function (_export, _context) {
   "use strict";
 
-  var DataDogDatasource, DataDogQueryCtrl, DataDogConfigCtrl, DataDogQueryOptionsCtrl;
+  var DataDogDatasource, DataDogQueryCtrl, DataDogConfigCtrl, DataDogQueryOptionsCtrl, DataDogAnnotationsQueryCtrl;
 
   function _classCallCheck(instance, Constructor) {
     if (!(instance instanceof Constructor)) {
@@ -30,6 +30,12 @@ System.register(['./datasource', './query_ctrl'], function (_export, _context) {
 
       DataDogQueryOptionsCtrl.templateUrl = "partials/query.options.html";
 
+      _export('AnnotationsQueryCtrl', DataDogAnnotationsQueryCtrl = function DataDogAnnotationsQueryCtrl() {
+        _classCallCheck(this, DataDogAnnotationsQueryCtrl);
+      });
+
+      DataDogAnnotationsQueryCtrl.templateUrl = 'partials/annotations.editor.html';
+
       _export('Datasource', DataDogDatasource);
 
       _export('QueryCtrl', DataDogQueryCtrl);
@@ -37,6 +43,8 @@ System.register(['./datasource', './query_ctrl'], function (_export, _context) {
       _export('ConfigCtrl', DataDogConfigCtrl);
 
       _export('QueryOptionsCtrl', DataDogQueryOptionsCtrl);
+
+      _export('AnnotationsQueryCtrl', DataDogAnnotationsQueryCtrl);
     }
   };
 });
