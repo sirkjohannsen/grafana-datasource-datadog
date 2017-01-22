@@ -1,5 +1,8 @@
 import _ from 'lodash';
+import dfunc from './dfunc';
 import {QueryCtrl} from 'app/plugins/sdk';
+import './func_editor';
+import './add_datadog_func';
 
 export class DataDogQueryCtrl extends QueryCtrl {
 
@@ -41,6 +44,14 @@ export class DataDogQueryCtrl extends QueryCtrl {
 
     this.fixTagSegments();
 
+    this.functions = [];
+    this.target.functions = this.target.functions || [];
+    _.map(this.target.functions, function (func) {
+      var f = dfunc.createFuncInstance(func.funcDef, {withDefaultParams: false});
+      f.params = func.params.slice();
+      self.functions.push(f);
+    });
+
     if (this.target.as) {
       this.asSegment = uiSegmentSrv.newSegment(this.target.as);
     } else {
@@ -71,6 +82,22 @@ export class DataDogQueryCtrl extends QueryCtrl {
     if (this.target.as) {
       this.target.query += '.' + this.target.as + '()';
     }
+
+    var groupedFuncs = _.groupBy(this.functions, func => {
+      if (func.def.append) {
+        return 'appends';
+      } else {
+        return 'wraps';
+      }
+    });
+
+    _.each(groupedFuncs.appends, func => {
+      this.target.query += '.'  + func.render();
+    });
+
+    _.each(groupedFuncs.wraps, func => {
+      this.target.query = func.render(this.target.query);
+    });
   }
 
   getMetrics() {
@@ -142,6 +169,38 @@ export class DataDogQueryCtrl extends QueryCtrl {
     if (!lastSegment || lastSegment.type !== 'plus-button') {
       this.tagSegments.push(this.uiSegmentSrv.newPlusButton());
     }
+  }
+
+  targetChanged() {
+    if (this.error) {
+      return;
+    }
+
+    this.setQuery();
+    this.panelCtrl.refresh();
+  }
+
+  persistFunctions () {
+    this.target.functions = _.map(this.functions, func => {
+      return {
+        funcDef: func.def.name,
+        params: func.params.slice(),
+      };
+    });
+  }
+
+  removeFunction(func) {
+    this.functions = _.without(this.functions, func);
+    this.persistFunctions();
+    this.targetChanged();
+  }
+
+  addFunction(funcDef) {
+    var func = dfunc.createFuncInstance(funcDef, {withDefaultParams: true});
+    func.added = true;
+    this.functions.push(func);
+    this.persistFunctions();
+    this.targetChanged();
   }
 
   tagSegmentUpdated(segment, index) {

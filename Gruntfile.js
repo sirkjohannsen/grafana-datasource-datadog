@@ -118,7 +118,7 @@ module.exports = function(grunt) {
   grunt.registerTask('dev', ['default', 'watch']);
 
   grunt.registerTask('watchTask', [
-    'clean',
+    // 'clean',
     'copy:src_to_dist',
     'copy:pluginDef',
     'babel',
