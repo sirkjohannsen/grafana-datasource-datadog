@@ -1,9 +1,9 @@
 'use strict';
 
-System.register(['lodash', 'app/plugins/sdk'], function (_export, _context) {
+System.register(['lodash', './dfunc', 'app/plugins/sdk', './func_editor', './add_datadog_func'], function (_export, _context) {
   "use strict";
 
-  var _, QueryCtrl, _createClass, DataDogQueryCtrl;
+  var _, dfunc, QueryCtrl, _createClass, DataDogQueryCtrl;
 
   function _classCallCheck(instance, Constructor) {
     if (!(instance instanceof Constructor)) {
@@ -38,9 +38,11 @@ System.register(['lodash', 'app/plugins/sdk'], function (_export, _context) {
   return {
     setters: [function (_lodash) {
       _ = _lodash.default;
+    }, function (_dfunc) {
+      dfunc = _dfunc.default;
     }, function (_appPluginsSdk) {
       QueryCtrl = _appPluginsSdk.QueryCtrl;
-    }],
+    }, function (_func_editor) {}, function (_add_datadog_func) {}],
     execute: function () {
       _createClass = function () {
         function defineProperties(target, props) {
@@ -100,6 +102,14 @@ System.register(['lodash', 'app/plugins/sdk'], function (_export, _context) {
 
           _this.fixTagSegments();
 
+          _this.functions = [];
+          _this.target.functions = _this.target.functions || [];
+          _.map(_this.target.functions, function (func) {
+            var f = dfunc.createFuncInstance(func.funcDef, { withDefaultParams: false });
+            f.params = func.params.slice();
+            self.functions.push(f);
+          });
+
           if (_this.target.as) {
             _this.asSegment = uiSegmentSrv.newSegment(_this.target.as);
           } else {
@@ -121,6 +131,8 @@ System.register(['lodash', 'app/plugins/sdk'], function (_export, _context) {
         }, {
           key: 'setQuery',
           value: function setQuery() {
+            var _this2 = this;
+
             this.target.query = this.aggregationSegment.value;
             if (!this.metricSegment.fake) {
               this.target.query += ":" + this.metricSegment.value;
@@ -134,6 +146,22 @@ System.register(['lodash', 'app/plugins/sdk'], function (_export, _context) {
             if (this.target.as) {
               this.target.query += '.' + this.target.as + '()';
             }
+
+            var groupedFuncs = _.groupBy(this.functions, function (func) {
+              if (func.def.append) {
+                return 'appends';
+              } else {
+                return 'wraps';
+              }
+            });
+
+            _.each(groupedFuncs.appends, function (func) {
+              _this2.target.query += '.' + func.render();
+            });
+
+            _.each(groupedFuncs.wraps, function (func) {
+              _this2.target.query = func.render(_this2.target.query);
+            });
           }
         }, {
           key: 'getMetrics',
@@ -204,6 +232,42 @@ System.register(['lodash', 'app/plugins/sdk'], function (_export, _context) {
             if (!lastSegment || lastSegment.type !== 'plus-button') {
               this.tagSegments.push(this.uiSegmentSrv.newPlusButton());
             }
+          }
+        }, {
+          key: 'targetChanged',
+          value: function targetChanged() {
+            if (this.error) {
+              return;
+            }
+
+            this.setQuery();
+            this.panelCtrl.refresh();
+          }
+        }, {
+          key: 'persistFunctions',
+          value: function persistFunctions() {
+            this.target.functions = _.map(this.functions, function (func) {
+              return {
+                funcDef: func.def.name,
+                params: func.params.slice()
+              };
+            });
+          }
+        }, {
+          key: 'removeFunction',
+          value: function removeFunction(func) {
+            this.functions = _.without(this.functions, func);
+            this.persistFunctions();
+            this.targetChanged();
+          }
+        }, {
+          key: 'addFunction',
+          value: function addFunction(funcDef) {
+            var func = dfunc.createFuncInstance(funcDef, { withDefaultParams: true });
+            func.added = true;
+            this.functions.push(func);
+            this.persistFunctions();
+            this.targetChanged();
           }
         }, {
           key: 'tagSegmentUpdated',

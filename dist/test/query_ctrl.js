@@ -11,7 +11,15 @@ var _lodash = require('lodash');
 
 var _lodash2 = _interopRequireDefault(_lodash);
 
+var _dfunc = require('./dfunc');
+
+var _dfunc2 = _interopRequireDefault(_dfunc);
+
 var _sdk = require('app/plugins/sdk');
+
+require('./func_editor');
+
+require('./add_datadog_func');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -61,6 +69,14 @@ var DataDogQueryCtrl = exports.DataDogQueryCtrl = function (_QueryCtrl) {
 
     _this.fixTagSegments();
 
+    _this.functions = [];
+    _this.target.functions = _this.target.functions || [];
+    _lodash2.default.map(_this.target.functions, function (func) {
+      var f = _dfunc2.default.createFuncInstance(func.funcDef, { withDefaultParams: false });
+      f.params = func.params.slice();
+      self.functions.push(f);
+    });
+
     if (_this.target.as) {
       _this.asSegment = uiSegmentSrv.newSegment(_this.target.as);
     } else {
@@ -82,6 +98,8 @@ var DataDogQueryCtrl = exports.DataDogQueryCtrl = function (_QueryCtrl) {
   }, {
     key: 'setQuery',
     value: function setQuery() {
+      var _this2 = this;
+
       this.target.query = this.aggregationSegment.value;
       if (!this.metricSegment.fake) {
         this.target.query += ":" + this.metricSegment.value;
@@ -95,6 +113,22 @@ var DataDogQueryCtrl = exports.DataDogQueryCtrl = function (_QueryCtrl) {
       if (this.target.as) {
         this.target.query += '.' + this.target.as + '()';
       }
+
+      var groupedFuncs = _lodash2.default.groupBy(this.functions, function (func) {
+        if (func.def.append) {
+          return 'appends';
+        } else {
+          return 'wraps';
+        }
+      });
+
+      _lodash2.default.each(groupedFuncs.appends, function (func) {
+        _this2.target.query += '.' + func.render();
+      });
+
+      _lodash2.default.each(groupedFuncs.wraps, function (func) {
+        _this2.target.query = func.render(_this2.target.query);
+      });
     }
   }, {
     key: 'getMetrics',
@@ -165,6 +199,42 @@ var DataDogQueryCtrl = exports.DataDogQueryCtrl = function (_QueryCtrl) {
       if (!lastSegment || lastSegment.type !== 'plus-button') {
         this.tagSegments.push(this.uiSegmentSrv.newPlusButton());
       }
+    }
+  }, {
+    key: 'targetChanged',
+    value: function targetChanged() {
+      if (this.error) {
+        return;
+      }
+
+      this.setQuery();
+      this.panelCtrl.refresh();
+    }
+  }, {
+    key: 'persistFunctions',
+    value: function persistFunctions() {
+      this.target.functions = _lodash2.default.map(this.functions, function (func) {
+        return {
+          funcDef: func.def.name,
+          params: func.params.slice()
+        };
+      });
+    }
+  }, {
+    key: 'removeFunction',
+    value: function removeFunction(func) {
+      this.functions = _lodash2.default.without(this.functions, func);
+      this.persistFunctions();
+      this.targetChanged();
+    }
+  }, {
+    key: 'addFunction',
+    value: function addFunction(funcDef) {
+      var func = _dfunc2.default.createFuncInstance(funcDef, { withDefaultParams: true });
+      func.added = true;
+      this.functions.push(func);
+      this.persistFunctions();
+      this.targetChanged();
     }
   }, {
     key: 'tagSegmentUpdated',
