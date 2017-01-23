@@ -129,7 +129,10 @@ var DataDogDatasource = exports.DataDogDatasource = function () {
       var queries = _lodash2.default.map(options.targets, function (val) {
         return val.query;
       });
+
       var queryString = queries.join(',');
+      queryString = this.templateSrv.replace(queryString, options.scopedVars);
+
       var params = {
         from: from,
         to: to,
