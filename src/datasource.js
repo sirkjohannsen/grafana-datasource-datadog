@@ -2,14 +2,13 @@ import _ from 'lodash';
 
 export class DataDogDatasource {
 
-  constructor (instanceSettings, $q, backendSrv, templateSrv) {
+  constructor (instanceSettings, backendSrv, templateSrv) {
     this.type = instanceSettings.type;
     this.url = instanceSettings.url;
     this.name = instanceSettings.name;
     this.api_key = instanceSettings.jsonData.api_key;
     this.application_key = instanceSettings.jsonData.app_key;
     this.supportMetrics = true;
-    this.q = $q;
     this.backendSrv = backendSrv;
     this.templateSrv = templateSrv;
     this._cached_metrics = false;
@@ -99,7 +98,7 @@ export class DataDogDatasource {
     var targets = options.targets.filter(function (t) { return !t.hide; });
 
     if (targets.length <= 0) {
-      return this.q.when({data: []});
+      return Promise.resolve({data: []});
     }
     var queries = _.map(options.targets, function (val) {
       return val.query;

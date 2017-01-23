@@ -35,7 +35,7 @@ System.register(['lodash'], function (_export, _context) {
       }();
 
       _export('DataDogDatasource', DataDogDatasource = function () {
-        function DataDogDatasource(instanceSettings, $q, backendSrv, templateSrv) {
+        function DataDogDatasource(instanceSettings, backendSrv, templateSrv) {
           _classCallCheck(this, DataDogDatasource);
 
           this.type = instanceSettings.type;
@@ -44,7 +44,6 @@ System.register(['lodash'], function (_export, _context) {
           this.api_key = instanceSettings.jsonData.api_key;
           this.application_key = instanceSettings.jsonData.app_key;
           this.supportMetrics = true;
-          this.q = $q;
           this.backendSrv = backendSrv;
           this.templateSrv = templateSrv;
           this._cached_metrics = false;
@@ -143,7 +142,7 @@ System.register(['lodash'], function (_export, _context) {
             });
 
             if (targets.length <= 0) {
-              return this.q.when({ data: [] });
+              return Promise.resolve({ data: [] });
             }
             var queries = _.map(options.targets, function (val) {
               return val.query;

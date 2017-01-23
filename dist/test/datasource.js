@@ -16,7 +16,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var DataDogDatasource = exports.DataDogDatasource = function () {
-  function DataDogDatasource(instanceSettings, $q, backendSrv, templateSrv) {
+  function DataDogDatasource(instanceSettings, backendSrv, templateSrv) {
     _classCallCheck(this, DataDogDatasource);
 
     this.type = instanceSettings.type;
@@ -25,7 +25,6 @@ var DataDogDatasource = exports.DataDogDatasource = function () {
     this.api_key = instanceSettings.jsonData.api_key;
     this.application_key = instanceSettings.jsonData.app_key;
     this.supportMetrics = true;
-    this.q = $q;
     this.backendSrv = backendSrv;
     this.templateSrv = templateSrv;
     this._cached_metrics = false;
@@ -124,7 +123,7 @@ var DataDogDatasource = exports.DataDogDatasource = function () {
       });
 
       if (targets.length <= 0) {
-        return this.q.when({ data: [] });
+        return Promise.resolve({ data: [] });
       }
       var queries = _lodash2.default.map(options.targets, function (val) {
         return val.query;
