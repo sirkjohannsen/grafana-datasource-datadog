@@ -14,6 +14,9 @@ describe('DataDogDatasource', () => {
         });
       }
     };
+    ctx.templateSrv = {
+      replace: (str) => str
+    };
 
     let instanceSettings = {
       url: 'https://app.datadoghq.com/api/v1',
@@ -22,7 +25,7 @@ describe('DataDogDatasource', () => {
         app_key: '0000abcd0000abcd'
       }
     };
-    ctx.ds = new Datasource(instanceSettings, ctx.$q, ctx.backendSrv, ctx.templateSrv);
+    ctx.ds = new Datasource(instanceSettings, ctx.backendSrv, ctx.templateSrv);
   });
 
   describe('When doing DataDog API request', () => {

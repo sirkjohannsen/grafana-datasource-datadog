@@ -24,6 +24,11 @@ describe('DataDogDatasource', function () {
         });
       }
     };
+    ctx.templateSrv = {
+      replace: function replace(str) {
+        return str;
+      }
+    };
 
     var instanceSettings = {
       url: 'https://app.datadoghq.com/api/v1',
@@ -32,7 +37,7 @@ describe('DataDogDatasource', function () {
         app_key: '0000abcd0000abcd'
       }
     };
-    ctx.ds = new _module.Datasource(instanceSettings, ctx.$q, ctx.backendSrv, ctx.templateSrv);
+    ctx.ds = new _module.Datasource(instanceSettings, ctx.backendSrv, ctx.templateSrv);
   });
 
   describe('When doing DataDog API request', function () {
