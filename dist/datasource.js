@@ -185,7 +185,8 @@ System.register(['lodash'], function (_export, _context) {
                   annotation: options.annotation,
                   time: event.date_happened * 1000,
                   title: event.title,
-                  text: event.text
+                  text: event.text,
+                  tags: event.tags
                 };
               });
             });
