@@ -176,7 +176,13 @@ System.register(['lodash'], function (_export, _context) {
           value: function annotationQuery(options) {
             var timeFrom = Math.floor(options.range.from.valueOf() / 1000);
             var timeTo = Math.floor(options.range.to.valueOf() / 1000);
-            return this.getEventStream(timeFrom, timeTo).then(function (eventStreams) {
+            var _options$annotation = options.annotation,
+                priority = _options$annotation.priority,
+                sources = _options$annotation.sources,
+                tags = _options$annotation.tags;
+
+
+            return this.getEventStream(timeFrom, timeTo, priority, sources, tags).then(function (eventStreams) {
               var eventAnnotations = eventStreams.map(function (eventStream) {
                 var allEvents = eventStream.children;
                 var filteredEvents = _.filter(allEvents, function (event) {
@@ -199,11 +205,20 @@ System.register(['lodash'], function (_export, _context) {
           }
         }, {
           key: 'getEventStream',
-          value: function getEventStream(timeFrom, timeTo) {
+          value: function getEventStream(timeFrom, timeTo, priority, sources, tags) {
             var params = {
               start: timeFrom,
               end: timeTo
             };
+            if (priority) {
+              params.priority = priority;
+            }
+            if (sources) {
+              params.sources = sources;
+            }
+            if (tags) {
+              params.tags = tags;
+            }
 
             return this.invokeDataDogApiRequest('/events', params).then(function (result) {
               if (result.events) {
