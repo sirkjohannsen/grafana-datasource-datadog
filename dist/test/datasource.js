@@ -166,7 +166,8 @@ var DataDogDatasource = exports.DataDogDatasource = function () {
             annotation: options.annotation,
             time: event.date_happened * 1000,
             title: event.title,
-            text: event.text
+            text: event.text,
+            tags: event.tags
           };
         });
       });
