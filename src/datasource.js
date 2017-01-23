@@ -132,7 +132,9 @@ export class DataDogDatasource {
   annotationQuery(options) {
     let timeFrom = Math.floor(options.range.from.valueOf() / 1000);
     let timeTo = Math.floor(options.range.to.valueOf() / 1000);
-    return this.getEventStream(timeFrom, timeTo)
+    let {priority, sources, tags} = options.annotation;
+
+    return this.getEventStream(timeFrom, timeTo, priority, sources, tags)
     .then(eventStreams => {
       let eventAnnotations = eventStreams.map(eventStream => {
         let allEvents = eventStream.children;
@@ -155,11 +157,20 @@ export class DataDogDatasource {
     });
   }
 
-  getEventStream(timeFrom, timeTo) {
+  getEventStream(timeFrom, timeTo, priority, sources, tags) {
     let params = {
       start: timeFrom,
       end: timeTo
     };
+    if (priority) {
+      params.priority = priority;
+    }
+    if (sources) {
+      params.sources = sources;
+    }
+    if (tags) {
+      params.tags = tags;
+    }
 
     return this.invokeDataDogApiRequest('/events', params)
     .then(result => {

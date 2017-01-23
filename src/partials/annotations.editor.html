@@ -1,9 +1,29 @@
 <div class="gf-form-group">
-  <div class="gf-form">
-    <span class="gf-form-label width-7">Tags</span>
-    <input type="text" class="gf-form-input width-25"
+  <div class="gf-form max-width-30">
+    <label class="gf-form-label width-7">Sources</label>
+    <input type="text" class="gf-form-input"
+      ng-model='ctrl.annotation.sources'
+      placeholder="">
+    </input>
+    <info-popover mode="right-absolute">
+      A comma separated string of sources
+    </info-popover>
+  </div>
+  <div class="gf-form max-width-30">
+    <label class="gf-form-label width-7">Tags</label>
+    <input type="text" class="gf-form-input"
       ng-model='ctrl.annotation.tags'
       placeholder="">
     </input>
+    <info-popover mode="right-absolute">
+      A comma separated string of tags
+    </info-popover>
+  </div>
+  <div class="gf-form">
+    <label class="gf-form-label width-7">Priority</label>
+    <select class="gf-form-input width-7"
+      ng-model="ctrl.annotation.priority"
+      ng-options="p.v as p.n for p in [{n: 'None', v: undefined}, {n: 'Low', v: 'low'}, {n: 'Normal', v: 'normal'}]">
+    </select>
   </div>
 </div>
