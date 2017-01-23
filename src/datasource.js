@@ -131,21 +131,28 @@ export class DataDogDatasource {
   }
 
   annotationQuery(options) {
-    console.log(options);
     let timeFrom = Math.floor(options.range.from.valueOf() / 1000);
     let timeTo = Math.floor(options.range.to.valueOf() / 1000);
     return this.getEventStream(timeFrom, timeTo)
-    .then(events => {
-      console.log(events);
-      return events.map(event => {
-        return {
-          annotation: options.annotation,
-          time: event.date_happened * 1000,
-          title: event.title,
-          text: event.text,
-          tags: event.tags
-        };
+    .then(eventStreams => {
+      let eventAnnotations = eventStreams.map(eventStream => {
+        let allEvents = eventStream.children;
+        let filteredEvents = _.filter(allEvents, event => {
+          return event.alert_type !== 'success';
+        });
+
+        return _.map(filteredEvents, event => {
+          return {
+            annotation: options.annotation,
+            time: event.date_happened * 1000,
+            title: eventStream.title,
+            text: eventStream.text,
+            tags: eventStream.tags
+          };
+        });
       });
+
+      return _.flatten(eventAnnotations);
     });
   }
 

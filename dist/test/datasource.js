@@ -156,20 +156,27 @@ var DataDogDatasource = exports.DataDogDatasource = function () {
   }, {
     key: 'annotationQuery',
     value: function annotationQuery(options) {
-      console.log(options);
       var timeFrom = Math.floor(options.range.from.valueOf() / 1000);
       var timeTo = Math.floor(options.range.to.valueOf() / 1000);
-      return this.getEventStream(timeFrom, timeTo).then(function (events) {
-        console.log(events);
-        return events.map(function (event) {
-          return {
-            annotation: options.annotation,
-            time: event.date_happened * 1000,
-            title: event.title,
-            text: event.text,
-            tags: event.tags
-          };
+      return this.getEventStream(timeFrom, timeTo).then(function (eventStreams) {
+        var eventAnnotations = eventStreams.map(function (eventStream) {
+          var allEvents = eventStream.children;
+          var filteredEvents = _lodash2.default.filter(allEvents, function (event) {
+            return event.alert_type !== 'success';
+          });
+
+          return _lodash2.default.map(filteredEvents, function (event) {
+            return {
+              annotation: options.annotation,
+              time: event.date_happened * 1000,
+              title: eventStream.title,
+              text: eventStream.text,
+              tags: eventStream.tags
+            };
+          });
         });
+
+        return _lodash2.default.flatten(eventAnnotations);
       });
     }
   }, {
