@@ -148,7 +148,10 @@ System.register(['lodash'], function (_export, _context) {
             var queries = _.map(options.targets, function (val) {
               return val.query;
             });
+
             var queryString = queries.join(',');
+            queryString = this.templateSrv.replace(queryString, options.scopedVars);
+
             var params = {
               from: from,
               to: to,
