@@ -15,7 +15,8 @@ describe('DataDogDatasource', () => {
       }
     };
     ctx.templateSrv = {
-      replace: (str) => str
+      replace: (str) => str,
+      getAdhocFilters: () => []
     };
 
     let instanceSettings = {

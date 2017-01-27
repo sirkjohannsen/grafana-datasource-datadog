@@ -27,6 +27,9 @@ describe('DataDogDatasource', function () {
     ctx.templateSrv = {
       replace: function replace(str) {
         return str;
+      },
+      getAdhocFilters: function getAdhocFilters() {
+        return [];
       }
     };
 
