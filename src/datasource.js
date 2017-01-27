@@ -47,9 +47,13 @@ export class DataDogDatasource {
       return this.fetching_tags;
     }
 
-    this.fetching_tags = this.invokeDataDogApiRequest('/tags/hosts')
-    .then(result => {
-      this._cached_tags = _.map(result.tags, (hosts, tag) => {
+    this.searchEntities('hosts').then(entitis => {
+      console.log(entitis);
+    });
+
+    this.fetching_tags = this.getTagsHosts()
+    .then(tags => {
+      this._cached_tags = _.map(tags, (hosts, tag) => {
         return {
           text: tag,
           value: tag,
@@ -91,6 +95,34 @@ export class DataDogDatasource {
     return this.fetching;
   }
 
+  getTagKeys(options) {
+    return this.getTagsHosts().then(tagsHosts => {
+      let tags = Object.keys(tagsHosts);
+      let kv = mapTagsToKVPairs(tags);
+      let grafanaTags = Object.keys(kv);
+      return grafanaTags.map(tag => {
+        return {
+          text: tag,
+          value: tag,
+        };
+      });
+    });
+  }
+
+  getTagValues(options) {
+    return this.getTagsHosts().then(tagsHosts => {
+      let tags = Object.keys(tagsHosts);
+      let kv = mapTagsToKVPairs(tags);
+      let grafanaValues = kv[options.key];
+      return grafanaValues.map(val => {
+        return {
+          text: val,
+          value: val,
+        };
+      });
+    });
+  }
+
   query(options) {
     var from = Math.floor(options.range.from.valueOf() / 1000);
     var to = Math.floor(options.range.to.valueOf() / 1000);
@@ -103,6 +135,10 @@ export class DataDogDatasource {
     var queries = _.map(options.targets, function (val) {
       return val.query;
     });
+
+    // add global adhoc filters
+    let adhocFilters = this.templateSrv.getAdhocFilters(this.name);
+    console.log(adhocFilters, this.buildAdHocFilterString());
 
     var queryString = queries.join(',');
     queryString = this.templateSrv.replace(queryString, options.scopedVars);
@@ -127,6 +163,13 @@ export class DataDogDatasource {
 
       return {data: dataResponse};
     });
+  }
+
+  buildAdHocFilterString() {
+    let adhocFilters = this.templateSrv.getAdhocFilters(this.name);
+    return adhocFilters.map(filter => {
+      return filter.key + ':' + filter.value;
+    }).join(',');
   }
 
   annotationQuery(options) {
@@ -154,6 +197,35 @@ export class DataDogDatasource {
       });
 
       return _.flatten(eventAnnotations);
+    });
+  }
+
+  getHosts() {
+    return this.searchEntities('hosts');
+  }
+
+  // entity should be 'hosts' or 'metrics'
+  // http://docs.datadoghq.com/api/?lang=console#search
+  searchEntities(entity) {
+    let params = {q: ''};
+    if (entity) {
+      params.q = `${entity}:`;
+    }
+
+    return this.invokeDataDogApiRequest('/search', params)
+    .then(result => {
+      if (result && result.results) {
+        return result.results[entity];
+      }
+    });
+  }
+
+  getTagsHosts() {
+    return this.invokeDataDogApiRequest('/tags/hosts')
+    .then(result => {
+      if (result && result.tags) {
+        return result.tags;
+      }
     });
   }
 
@@ -211,4 +283,32 @@ export class DataDogDatasource {
       }
     });
   }
+}
+
+/*
+ * Convert tags to key-value pairs
+ * [region:east, region:nw] => {region: [east, nw]}
+ */
+function mapTagsToKVPairs(tags) {
+  let kv_tags = _.filter(tags, tag => {
+    return (tag.indexOf(':') !== -1);
+  });
+
+  let kv_pairs = kv_tags.map(tag => {
+    return tag.split(':', 2); // Limit to 2
+  });
+
+  let kv_object = {};
+  kv_pairs.forEach(pair => {
+    let key = pair[0];
+    let val = pair[1];
+
+    if (kv_object[key]) {
+      kv_object[key].push(val);
+    } else {
+      kv_object[key] = [val];
+    }
+  });
+
+  return kv_object;
 }

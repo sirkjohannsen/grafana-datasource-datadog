@@ -68,8 +68,12 @@ var DataDogDatasource = exports.DataDogDatasource = function () {
         return this.fetching_tags;
       }
 
-      this.fetching_tags = this.invokeDataDogApiRequest('/tags/hosts').then(function (result) {
-        _this._cached_tags = _lodash2.default.map(result.tags, function (hosts, tag) {
+      this.searchEntities('hosts').then(function (entitis) {
+        console.log(entitis);
+      });
+
+      this.fetching_tags = this.getTagsHosts().then(function (tags) {
+        _this._cached_tags = _lodash2.default.map(tags, function (hosts, tag) {
           return {
             text: tag,
             value: tag
@@ -111,6 +115,36 @@ var DataDogDatasource = exports.DataDogDatasource = function () {
       });
 
       return this.fetching;
+    }
+  }, {
+    key: 'getTagKeys',
+    value: function getTagKeys(options) {
+      return this.getTagsHosts().then(function (tagsHosts) {
+        var tags = Object.keys(tagsHosts);
+        var kv = mapTagsToKVPairs(tags);
+        var grafanaTags = Object.keys(kv);
+        return grafanaTags.map(function (tag) {
+          return {
+            text: tag,
+            value: tag
+          };
+        });
+      });
+    }
+  }, {
+    key: 'getTagValues',
+    value: function getTagValues(options) {
+      return this.getTagsHosts().then(function (tagsHosts) {
+        var tags = Object.keys(tagsHosts);
+        var kv = mapTagsToKVPairs(tags);
+        var grafanaValues = kv[options.key];
+        return grafanaValues.map(function (val) {
+          return {
+            text: val,
+            value: val
+          };
+        });
+      });
     }
   }, {
     key: 'query',
@@ -185,6 +219,38 @@ var DataDogDatasource = exports.DataDogDatasource = function () {
       });
     }
   }, {
+    key: 'getHosts',
+    value: function getHosts() {
+      return this.searchEntities('hosts');
+    }
+
+    // entity should be 'hosts' or 'metrics'
+    // http://docs.datadoghq.com/api/?lang=console#search
+
+  }, {
+    key: 'searchEntities',
+    value: function searchEntities(entity) {
+      var params = { q: '' };
+      if (entity) {
+        params.q = entity + ':';
+      }
+
+      return this.invokeDataDogApiRequest('/search', params).then(function (result) {
+        if (result && result.results) {
+          return result.results[entity];
+        }
+      });
+    }
+  }, {
+    key: 'getTagsHosts',
+    value: function getTagsHosts() {
+      return this.invokeDataDogApiRequest('/tags/hosts').then(function (result) {
+        if (result && result.tags) {
+          return result.tags;
+        }
+      });
+    }
+  }, {
     key: 'getEventStream',
     value: function getEventStream(timeFrom, timeTo, priority, sources, tags) {
       var params = {
@@ -244,4 +310,34 @@ var DataDogDatasource = exports.DataDogDatasource = function () {
 
   return DataDogDatasource;
 }();
+
+/*
+ * Convert tags to key-value pairs
+ * [region:east, region:nw] => {region: [east, nw]}
+ */
+
+
+function mapTagsToKVPairs(tags) {
+  var kv_tags = _lodash2.default.filter(tags, function (tag) {
+    return tag.indexOf(':') !== -1;
+  });
+
+  var kv_pairs = kv_tags.map(function (tag) {
+    return tag.split(':', 2); // Limit to 2
+  });
+
+  var kv_object = {};
+  kv_pairs.forEach(function (pair) {
+    var key = pair[0];
+    var val = pair[1];
+
+    if (kv_object[key]) {
+      kv_object[key].push(val);
+    } else {
+      kv_object[key] = [val];
+    }
+  });
+
+  return kv_object;
+}
 //# sourceMappingURL=datasource.js.map
