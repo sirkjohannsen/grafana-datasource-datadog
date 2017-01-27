@@ -211,7 +211,7 @@ System.register(['lodash', './query_builder'], function (_export, _context) {
             // add global adhoc filters
             var adhocFilters = this.templateSrv.getAdhocFilters(this.name);
 
-            var queries = _.map(options.targets, function (target) {
+            var queries = _.map(targets, function (target) {
               var query = queryBuilder.buildQuery(target, adhocFilters);
               return query;
             });

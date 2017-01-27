@@ -169,7 +169,7 @@ var DataDogDatasource = exports.DataDogDatasource = function () {
       // add global adhoc filters
       var adhocFilters = this.templateSrv.getAdhocFilters(this.name);
 
-      var queries = _lodash2.default.map(options.targets, function (target) {
+      var queries = _lodash2.default.map(targets, function (target) {
         var query = queryBuilder.buildQuery(target, adhocFilters);
         return query;
       });

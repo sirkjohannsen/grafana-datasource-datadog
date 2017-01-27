@@ -137,7 +137,7 @@ export class DataDogDatasource {
     // add global adhoc filters
     let adhocFilters = this.templateSrv.getAdhocFilters(this.name);
 
-    var queries = _.map(options.targets, target => {
+    var queries = _.map(targets, target => {
       let query = queryBuilder.buildQuery(target, adhocFilters);
       return query;
     });
