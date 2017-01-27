@@ -11,6 +11,12 @@ var _lodash = require('lodash');
 
 var _lodash2 = _interopRequireDefault(_lodash);
 
+var _query_builder = require('./query_builder');
+
+var queryBuilder = _interopRequireWildcard(_query_builder);
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -159,8 +165,13 @@ var DataDogDatasource = exports.DataDogDatasource = function () {
       if (targets.length <= 0) {
         return Promise.resolve({ data: [] });
       }
-      var queries = _lodash2.default.map(options.targets, function (val) {
-        return val.query;
+
+      // add global adhoc filters
+      var adhocFilters = this.templateSrv.getAdhocFilters(this.name);
+
+      var queries = _lodash2.default.map(options.targets, function (target) {
+        var query = queryBuilder.buildQuery(target, adhocFilters);
+        return query;
       });
 
       var queryString = queries.join(',');

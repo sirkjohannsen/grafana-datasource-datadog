@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import * as queryBuilder from './query_builder';
 
 export class DataDogDatasource {
 
@@ -132,13 +133,14 @@ export class DataDogDatasource {
     if (targets.length <= 0) {
       return Promise.resolve({data: []});
     }
-    var queries = _.map(options.targets, function (val) {
-      return val.query;
-    });
 
     // add global adhoc filters
     let adhocFilters = this.templateSrv.getAdhocFilters(this.name);
-    console.log(adhocFilters, this.buildAdHocFilterString());
+
+    var queries = _.map(options.targets, target => {
+      let query = queryBuilder.buildQuery(target, adhocFilters);
+      return query;
+    });
 
     var queryString = queries.join(',');
     queryString = this.templateSrv.replace(queryString, options.scopedVars);
@@ -163,13 +165,6 @@ export class DataDogDatasource {
 
       return {data: dataResponse};
     });
-  }
-
-  buildAdHocFilterString() {
-    let adhocFilters = this.templateSrv.getAdhocFilters(this.name);
-    return adhocFilters.map(filter => {
-      return filter.key + ':' + filter.value;
-    }).join(',');
   }
 
   annotationQuery(options) {

@@ -21,6 +21,12 @@ require('./func_editor');
 
 require('./add_datadog_func');
 
+var _query_builder = require('./query_builder');
+
+var queryBuilder = _interopRequireWildcard(_query_builder);
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -96,41 +102,6 @@ var DataDogQueryCtrl = exports.DataDogQueryCtrl = function (_QueryCtrl) {
       this.target.rawQuery = !this.target.rawQuery;
     }
   }, {
-    key: 'setQuery',
-    value: function setQuery() {
-      var _this2 = this;
-
-      this.target.query = this.aggregationSegment.value;
-      if (!this.metricSegment.fake) {
-        this.target.query += ":" + this.metricSegment.value;
-      }
-      if (!this.target.tags || this.target.tags.length === 0) {
-        this.target.query += '{*}';
-      } else {
-        this.target.query += '{' + this.target.tags.join(',') + '}';
-      }
-
-      if (this.target.as) {
-        this.target.query += '.' + this.target.as + '()';
-      }
-
-      var groupedFuncs = _lodash2.default.groupBy(this.functions, function (func) {
-        if (func.def.append) {
-          return 'appends';
-        } else {
-          return 'wraps';
-        }
-      });
-
-      _lodash2.default.each(groupedFuncs.appends, function (func) {
-        _this2.target.query += '.' + func.render();
-      });
-
-      _lodash2.default.each(groupedFuncs.wraps, function (func) {
-        _this2.target.query = func.render(_this2.target.query);
-      });
-    }
-  }, {
     key: 'getMetrics',
     value: function getMetrics() {
       return this.datasource.metricFindQuery();
@@ -168,7 +139,6 @@ var DataDogQueryCtrl = exports.DataDogQueryCtrl = function (_QueryCtrl) {
   }, {
     key: 'aggregationChanged',
     value: function aggregationChanged() {
-      this.setQuery();
       this.target.aggregation = this.aggregationSegment.value;
       this.panelCtrl.refresh();
     }
@@ -176,7 +146,6 @@ var DataDogQueryCtrl = exports.DataDogQueryCtrl = function (_QueryCtrl) {
     key: 'metricChanged',
     value: function metricChanged() {
       this.target.metric = this.metricSegment.value;
-      this.setQuery();
       this.panelCtrl.refresh();
     }
   }, {
@@ -187,7 +156,6 @@ var DataDogQueryCtrl = exports.DataDogQueryCtrl = function (_QueryCtrl) {
       } else {
         this.target.as = this.asSegment.value;
       }
-      this.setQuery();
       this.panelCtrl.refresh();
     }
   }, {
@@ -207,7 +175,6 @@ var DataDogQueryCtrl = exports.DataDogQueryCtrl = function (_QueryCtrl) {
         return;
       }
 
-      this.setQuery();
       this.panelCtrl.refresh();
     }
   }, {
@@ -247,7 +214,6 @@ var DataDogQueryCtrl = exports.DataDogQueryCtrl = function (_QueryCtrl) {
         return segment.value;
       }));
       console.log("setting target tags", this.target.tags);
-      this.setQuery();
       this.panelCtrl.refresh();
 
       var count = this.tagSegments.length;
@@ -260,7 +226,7 @@ var DataDogQueryCtrl = exports.DataDogQueryCtrl = function (_QueryCtrl) {
   }, {
     key: 'getCollapsedText',
     value: function getCollapsedText() {
-      return this.target.query;
+      return queryBuilder.buildQuery(this.target);
     }
   }]);
 

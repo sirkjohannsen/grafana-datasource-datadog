@@ -1,9 +1,9 @@
 'use strict';
 
-System.register(['lodash', './dfunc', 'app/plugins/sdk', './func_editor', './add_datadog_func'], function (_export, _context) {
+System.register(['lodash', './dfunc', 'app/plugins/sdk', './func_editor', './add_datadog_func', './query_builder'], function (_export, _context) {
   "use strict";
 
-  var _, dfunc, QueryCtrl, _createClass, DataDogQueryCtrl;
+  var _, dfunc, QueryCtrl, queryBuilder, _createClass, DataDogQueryCtrl;
 
   function _classCallCheck(instance, Constructor) {
     if (!(instance instanceof Constructor)) {
@@ -42,7 +42,9 @@ System.register(['lodash', './dfunc', 'app/plugins/sdk', './func_editor', './add
       dfunc = _dfunc.default;
     }, function (_appPluginsSdk) {
       QueryCtrl = _appPluginsSdk.QueryCtrl;
-    }, function (_func_editor) {}, function (_add_datadog_func) {}],
+    }, function (_func_editor) {}, function (_add_datadog_func) {}, function (_query_builder) {
+      queryBuilder = _query_builder;
+    }],
     execute: function () {
       _createClass = function () {
         function defineProperties(target, props) {
@@ -129,41 +131,6 @@ System.register(['lodash', './dfunc', 'app/plugins/sdk', './func_editor', './add
             this.target.rawQuery = !this.target.rawQuery;
           }
         }, {
-          key: 'setQuery',
-          value: function setQuery() {
-            var _this2 = this;
-
-            this.target.query = this.aggregationSegment.value;
-            if (!this.metricSegment.fake) {
-              this.target.query += ":" + this.metricSegment.value;
-            }
-            if (!this.target.tags || this.target.tags.length === 0) {
-              this.target.query += '{*}';
-            } else {
-              this.target.query += '{' + this.target.tags.join(',') + '}';
-            }
-
-            if (this.target.as) {
-              this.target.query += '.' + this.target.as + '()';
-            }
-
-            var groupedFuncs = _.groupBy(this.functions, function (func) {
-              if (func.def.append) {
-                return 'appends';
-              } else {
-                return 'wraps';
-              }
-            });
-
-            _.each(groupedFuncs.appends, function (func) {
-              _this2.target.query += '.' + func.render();
-            });
-
-            _.each(groupedFuncs.wraps, function (func) {
-              _this2.target.query = func.render(_this2.target.query);
-            });
-          }
-        }, {
           key: 'getMetrics',
           value: function getMetrics() {
             return this.datasource.metricFindQuery();
@@ -201,7 +168,6 @@ System.register(['lodash', './dfunc', 'app/plugins/sdk', './func_editor', './add
         }, {
           key: 'aggregationChanged',
           value: function aggregationChanged() {
-            this.setQuery();
             this.target.aggregation = this.aggregationSegment.value;
             this.panelCtrl.refresh();
           }
@@ -209,7 +175,6 @@ System.register(['lodash', './dfunc', 'app/plugins/sdk', './func_editor', './add
           key: 'metricChanged',
           value: function metricChanged() {
             this.target.metric = this.metricSegment.value;
-            this.setQuery();
             this.panelCtrl.refresh();
           }
         }, {
@@ -220,7 +185,6 @@ System.register(['lodash', './dfunc', 'app/plugins/sdk', './func_editor', './add
             } else {
               this.target.as = this.asSegment.value;
             }
-            this.setQuery();
             this.panelCtrl.refresh();
           }
         }, {
@@ -240,7 +204,6 @@ System.register(['lodash', './dfunc', 'app/plugins/sdk', './func_editor', './add
               return;
             }
 
-            this.setQuery();
             this.panelCtrl.refresh();
           }
         }, {
@@ -280,7 +243,6 @@ System.register(['lodash', './dfunc', 'app/plugins/sdk', './func_editor', './add
               return segment.value;
             }));
             console.log("setting target tags", this.target.tags);
-            this.setQuery();
             this.panelCtrl.refresh();
 
             var count = this.tagSegments.length;
@@ -293,7 +255,7 @@ System.register(['lodash', './dfunc', 'app/plugins/sdk', './func_editor', './add
         }, {
           key: 'getCollapsedText',
           value: function getCollapsedText() {
-            return this.target.query;
+            return queryBuilder.buildQuery(this.target);
           }
         }]);
 

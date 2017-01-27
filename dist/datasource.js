@@ -1,9 +1,9 @@
 'use strict';
 
-System.register(['lodash'], function (_export, _context) {
+System.register(['lodash', './query_builder'], function (_export, _context) {
   "use strict";
 
-  var _, _createClass, DataDogDatasource;
+  var _, queryBuilder, _createClass, DataDogDatasource;
 
   function _classCallCheck(instance, Constructor) {
     if (!(instance instanceof Constructor)) {
@@ -41,6 +41,8 @@ System.register(['lodash'], function (_export, _context) {
   return {
     setters: [function (_lodash) {
       _ = _lodash.default;
+    }, function (_query_builder) {
+      queryBuilder = _query_builder;
     }],
     execute: function () {
       _createClass = function () {
@@ -205,8 +207,13 @@ System.register(['lodash'], function (_export, _context) {
             if (targets.length <= 0) {
               return Promise.resolve({ data: [] });
             }
-            var queries = _.map(options.targets, function (val) {
-              return val.query;
+
+            // add global adhoc filters
+            var adhocFilters = this.templateSrv.getAdhocFilters(this.name);
+
+            var queries = _.map(options.targets, function (target) {
+              var query = queryBuilder.buildQuery(target, adhocFilters);
+              return query;
             });
 
             var queryString = queries.join(',');

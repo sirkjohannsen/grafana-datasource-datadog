@@ -3,6 +3,7 @@ import dfunc from './dfunc';
 import {QueryCtrl} from 'app/plugins/sdk';
 import './func_editor';
 import './add_datadog_func';
+import * as queryBuilder from './query_builder';
 
 export class DataDogQueryCtrl extends QueryCtrl {
 
@@ -68,38 +69,6 @@ export class DataDogQueryCtrl extends QueryCtrl {
     this.target.rawQuery = !this.target.rawQuery;
   }
 
-  setQuery() {
-    this.target.query = this.aggregationSegment.value;
-    if (! this.metricSegment.fake) {
-      this.target.query += ":" + this.metricSegment.value;
-    }
-    if (!this.target.tags || this.target.tags.length === 0) {
-      this.target.query += '{*}';
-    } else {
-      this.target.query += '{' + this.target.tags.join(',') + '}';
-    }
-
-    if (this.target.as) {
-      this.target.query += '.' + this.target.as + '()';
-    }
-
-    var groupedFuncs = _.groupBy(this.functions, func => {
-      if (func.def.append) {
-        return 'appends';
-      } else {
-        return 'wraps';
-      }
-    });
-
-    _.each(groupedFuncs.appends, func => {
-      this.target.query += '.'  + func.render();
-    });
-
-    _.each(groupedFuncs.wraps, func => {
-      this.target.query = func.render(this.target.query);
-    });
-  }
-
   getMetrics() {
     return this.datasource.metricFindQuery();
   }
@@ -141,14 +110,12 @@ export class DataDogQueryCtrl extends QueryCtrl {
   }
 
   aggregationChanged() {
-    this.setQuery();
     this.target.aggregation = this.aggregationSegment.value;
     this.panelCtrl.refresh();
   }
 
   metricChanged() {
     this.target.metric = this.metricSegment.value;
-    this.setQuery();
     this.panelCtrl.refresh();
   }
 
@@ -158,7 +125,6 @@ export class DataDogQueryCtrl extends QueryCtrl {
     } else {
       this.target.as = this.asSegment.value;
     }
-    this.setQuery();
     this.panelCtrl.refresh();
   }
 
@@ -176,7 +142,6 @@ export class DataDogQueryCtrl extends QueryCtrl {
       return;
     }
 
-    this.setQuery();
     this.panelCtrl.refresh();
   }
 
@@ -212,7 +177,6 @@ export class DataDogQueryCtrl extends QueryCtrl {
       return segment.value;
     }));
     console.log("setting target tags", this.target.tags);
-    this.setQuery();
     this.panelCtrl.refresh();
 
     var count = this.tagSegments.length;
@@ -224,7 +188,7 @@ export class DataDogQueryCtrl extends QueryCtrl {
   }
 
   getCollapsedText() {
-    return this.target.query;
+    return queryBuilder.buildQuery(this.target);
   }
 }
 
