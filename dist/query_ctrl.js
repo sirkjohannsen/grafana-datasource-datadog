@@ -255,7 +255,11 @@ System.register(['lodash', './dfunc', 'app/plugins/sdk', './func_editor', './add
         }, {
           key: 'getCollapsedText',
           value: function getCollapsedText() {
-            return queryBuilder.buildQuery(this.target);
+            if (this.target.rawQuery) {
+              return this.target.query;
+            } else {
+              return queryBuilder.buildQuery(this.target);
+            }
           }
         }]);
 

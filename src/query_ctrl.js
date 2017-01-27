@@ -188,7 +188,11 @@ export class DataDogQueryCtrl extends QueryCtrl {
   }
 
   getCollapsedText() {
-    return queryBuilder.buildQuery(this.target);
+    if (this.target.rawQuery) {
+      return this.target.query;
+    } else {
+      return queryBuilder.buildQuery(this.target);
+    }
   }
 }
 

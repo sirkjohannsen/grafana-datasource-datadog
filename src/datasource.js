@@ -125,7 +125,12 @@ export class DataDogDatasource {
     let adhocFilters = this.templateSrv.getAdhocFilters(this.name);
 
     var queries = _.map(targets, target => {
-      let query = queryBuilder.buildQuery(target, adhocFilters);
+      let query;
+      if (target.rawQuery) {
+        query = target.query;
+      } else {
+        query = queryBuilder.buildQuery(target, adhocFilters);
+      }
       return query;
     });
 

@@ -45,7 +45,7 @@ describe('DataDogDatasource', function () {
 
   describe('When doing DataDog API request', function () {
     beforeEach(function () {
-      var targets = [{ query: 'avg:system.load.5{*}' }];
+      var targets = [{ query: 'avg:system.load.5{*}', rawQuery: true }];
 
       ctx.options = {
         range: {

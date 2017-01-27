@@ -226,7 +226,11 @@ var DataDogQueryCtrl = exports.DataDogQueryCtrl = function (_QueryCtrl) {
   }, {
     key: 'getCollapsedText',
     value: function getCollapsedText() {
-      return queryBuilder.buildQuery(this.target);
+      if (this.target.rawQuery) {
+        return this.target.query;
+      } else {
+        return queryBuilder.buildQuery(this.target);
+      }
     }
   }]);
 

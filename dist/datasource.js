@@ -195,7 +195,12 @@ System.register(['lodash', './query_builder'], function (_export, _context) {
             var adhocFilters = this.templateSrv.getAdhocFilters(this.name);
 
             var queries = _.map(targets, function (target) {
-              var query = queryBuilder.buildQuery(target, adhocFilters);
+              var query = void 0;
+              if (target.rawQuery) {
+                query = target.query;
+              } else {
+                query = queryBuilder.buildQuery(target, adhocFilters);
+              }
               return query;
             });
 
