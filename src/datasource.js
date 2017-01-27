@@ -40,31 +40,15 @@ export class DataDogDatasource {
   }
 
   metricFindTags() {
-    if (this._cached_tags && this._cached_tags.length) {
-      return Promise.resolve(this._cached_tags);
-    }
-
-    if (this.fetching_tags) {
-      return this.fetching_tags;
-    }
-
-    this.searchEntities('hosts').then(entitis => {
-      console.log(entitis);
-    });
-
-    this.fetching_tags = this.getTagsHosts()
+    return this.getTagsFromCache()
     .then(tags => {
-      this._cached_tags = _.map(tags, (hosts, tag) => {
+      return _.map(tags, (hosts, tag) => {
         return {
           text: tag,
           value: tag,
         };
       });
-
-      return this._cached_tags;
     });
-
-    return this.fetching_tags;
   }
 
   metricFindQuery() {
@@ -96,11 +80,13 @@ export class DataDogDatasource {
     return this.fetching;
   }
 
-  getTagKeys(options) {
-    return this.getTagsHosts().then(tagsHosts => {
+  getTagKeys() {
+    return this.getTagsFromCache()
+    .then(tagsHosts => {
       let tags = Object.keys(tagsHosts);
       let kv = mapTagsToKVPairs(tags);
       let grafanaTags = Object.keys(kv);
+
       return grafanaTags.map(tag => {
         return {
           text: tag,
@@ -111,7 +97,8 @@ export class DataDogDatasource {
   }
 
   getTagValues(options) {
-    return this.getTagsHosts().then(tagsHosts => {
+    return this.getTagsFromCache()
+    .then(tagsHosts => {
       let tags = Object.keys(tagsHosts);
       let kv = mapTagsToKVPairs(tags);
       let grafanaValues = kv[options.key];
@@ -222,6 +209,20 @@ export class DataDogDatasource {
         return result.tags;
       }
     });
+  }
+
+  getTagsFromCache() {
+    let getTags;
+    if (this._cached_tags && this._cached_tags.length) {
+      getTags = Promise.resolve(this._cached_tags);
+    } else {
+      getTags = this.getTagsHosts().then(tags => {
+        this._cached_tags = tags;
+        return tags;
+      });
+    }
+
+    return getTags;
   }
 
   getEventStream(timeFrom, timeTo, priority, sources, tags) {

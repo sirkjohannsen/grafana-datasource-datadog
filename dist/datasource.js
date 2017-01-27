@@ -106,37 +106,19 @@ System.register(['lodash', './query_builder'], function (_export, _context) {
         }, {
           key: 'metricFindTags',
           value: function metricFindTags() {
-            var _this = this;
-
-            if (this._cached_tags && this._cached_tags.length) {
-              return Promise.resolve(this._cached_tags);
-            }
-
-            if (this.fetching_tags) {
-              return this.fetching_tags;
-            }
-
-            this.searchEntities('hosts').then(function (entitis) {
-              console.log(entitis);
-            });
-
-            this.fetching_tags = this.getTagsHosts().then(function (tags) {
-              _this._cached_tags = _.map(tags, function (hosts, tag) {
+            return this.getTagsFromCache().then(function (tags) {
+              return _.map(tags, function (hosts, tag) {
                 return {
                   text: tag,
                   value: tag
                 };
               });
-
-              return _this._cached_tags;
             });
-
-            return this.fetching_tags;
           }
         }, {
           key: 'metricFindQuery',
           value: function metricFindQuery() {
-            var _this2 = this;
+            var _this = this;
 
             if (this._cached_metrics) {
               return Promise.resolve(this._cached_metrics);
@@ -152,25 +134,26 @@ System.register(['lodash', './query_builder'], function (_export, _context) {
             var params = { from: from };
 
             this.fetching = this.invokeDataDogApiRequest('/metrics', params).then(function (result) {
-              _this2._cached_metrics = _.map(result.metrics, function (metric) {
+              _this._cached_metrics = _.map(result.metrics, function (metric) {
                 return {
                   text: metric,
                   value: metric
                 };
               });
 
-              return _this2._cached_metrics;
+              return _this._cached_metrics;
             });
 
             return this.fetching;
           }
         }, {
           key: 'getTagKeys',
-          value: function getTagKeys(options) {
-            return this.getTagsHosts().then(function (tagsHosts) {
+          value: function getTagKeys() {
+            return this.getTagsFromCache().then(function (tagsHosts) {
               var tags = Object.keys(tagsHosts);
               var kv = mapTagsToKVPairs(tags);
               var grafanaTags = Object.keys(kv);
+
               return grafanaTags.map(function (tag) {
                 return {
                   text: tag,
@@ -182,7 +165,7 @@ System.register(['lodash', './query_builder'], function (_export, _context) {
         }, {
           key: 'getTagValues',
           value: function getTagValues(options) {
-            return this.getTagsHosts().then(function (tagsHosts) {
+            return this.getTagsFromCache().then(function (tagsHosts) {
               var tags = Object.keys(tagsHosts);
               var kv = mapTagsToKVPairs(tags);
               var grafanaValues = kv[options.key];
@@ -298,6 +281,23 @@ System.register(['lodash', './query_builder'], function (_export, _context) {
                 return result.tags;
               }
             });
+          }
+        }, {
+          key: 'getTagsFromCache',
+          value: function getTagsFromCache() {
+            var _this2 = this;
+
+            var getTags = void 0;
+            if (this._cached_tags && this._cached_tags.length) {
+              getTags = Promise.resolve(this._cached_tags);
+            } else {
+              getTags = this.getTagsHosts().then(function (tags) {
+                _this2._cached_tags = tags;
+                return tags;
+              });
+            }
+
+            return getTags;
           }
         }, {
           key: 'getEventStream',
