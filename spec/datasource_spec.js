@@ -32,7 +32,7 @@ describe('DataDogDatasource', () => {
   describe('When doing DataDog API request', () => {
     beforeEach(function() {
       let targets = [
-        { query: 'avg:system.load.5{*}' }
+        { query: 'avg:system.load.5{*}', rawQuery: true }
       ];
 
       ctx.options = {
