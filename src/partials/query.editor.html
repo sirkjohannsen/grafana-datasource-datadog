@@ -15,6 +15,10 @@
         <label class="gf-form-label query-keyword width-7">METRIC</label>
         <metric-segment segment="ctrl.metricSegment" get-options="ctrl.getMetrics()" on-change="ctrl.metricChanged()"></metric-segment>
       </div>
+      <div class="gf-form">
+        <label class="gf-form-label query-keyword width-7">POST</label>
+        <metric-segment segment="ctrl.asSegment" get-options="ctrl.getAs()" on-change="ctrl.asChanged()"></metric-segment>
+      </div>
 
       <div class="gf-form gf-form--grow">
         <div class="gf-form-label gf-form-label--grow"></div>
@@ -23,15 +27,10 @@
 
     <div class="gf-form-inline">
       <div class="gf-form">
-        <label class="gf-form-label query-keyword">SCOPE</label>
+        <label class="gf-form-label query-keyword width-7">SCOPE</label>
       </div>
       <div class="gf-form" ng-repeat="segment in ctrl.tagSegments">
         <metric-segment segment="segment" get-options="ctrl.getTags(segment, $index)" on-change="ctrl.tagSegmentUpdated(segment, $index)"></metric-segment>
-      </div>
-
-      <div class="gf-form">
-        <label class="gf-form-label query-keyword width-7">POST</label>
-        <metric-segment segment="ctrl.asSegment" get-options="ctrl.getAs()" on-change="ctrl.asChanged()"></metric-segment>
       </div>
 
       <div class="gf-form gf-form--grow">
