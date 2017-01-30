@@ -38,13 +38,12 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 var DataDogQueryCtrl = exports.DataDogQueryCtrl = function (_QueryCtrl) {
   _inherits(DataDogQueryCtrl, _QueryCtrl);
 
-  function DataDogQueryCtrl($scope, $injector, $q, uiSegmentSrv, templateSrv) {
+  function DataDogQueryCtrl($scope, $injector, uiSegmentSrv, templateSrv) {
     _classCallCheck(this, DataDogQueryCtrl);
 
     var _this = _possibleConstructorReturn(this, (DataDogQueryCtrl.__proto__ || Object.getPrototypeOf(DataDogQueryCtrl)).call(this, $scope, $injector));
 
     _this.removeText = '-- remove tag --';
-    _this.$q = $q;
     _this.uiSegmentSrv = uiSegmentSrv;
     _this.templateSrv = templateSrv;
 
@@ -106,12 +105,12 @@ var DataDogQueryCtrl = exports.DataDogQueryCtrl = function (_QueryCtrl) {
   }, {
     key: 'getAggregations',
     value: function getAggregations() {
-      return this.$q.when([{ text: 'avg by', value: 'avg' }, { text: 'max by', value: 'max' }, { text: 'min by', value: 'min' }, { text: 'sub by', value: 'sum' }]);
+      return Promise.resolve([{ text: 'avg by', value: 'avg' }, { text: 'max by', value: 'max' }, { text: 'min by', value: 'min' }, { text: 'sub by', value: 'sum' }]);
     }
   }, {
     key: 'getAs',
     value: function getAs() {
-      return this.$q.when([{ text: 'None', value: 'None' }, { text: 'as_count', value: 'as_count' }, { text: 'as_rate', value: 'as_rate' }]);
+      return Promise.resolve([{ text: 'None', value: 'None' }, { text: 'as_count', value: 'as_count' }, { text: 'as_rate', value: 'as_rate' }]);
     }
   }, {
     key: 'getTags',

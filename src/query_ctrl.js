@@ -7,10 +7,9 @@ import * as queryBuilder from './query_builder';
 
 export class DataDogQueryCtrl extends QueryCtrl {
 
-  constructor($scope, $injector, $q, uiSegmentSrv, templateSrv)  {
+  constructor($scope, $injector, uiSegmentSrv, templateSrv)  {
     super($scope, $injector);
     this.removeText = '-- remove tag --';
-    this.$q = $q;
     this.uiSegmentSrv = uiSegmentSrv;
     this.templateSrv = templateSrv;
 
@@ -72,7 +71,7 @@ export class DataDogQueryCtrl extends QueryCtrl {
   }
 
   getAggregations() {
-    return this.$q.when([
+    return Promise.resolve([
       {text: 'avg by', value: 'avg'},
       {text: 'max by', value: 'max'},
       {text: 'min by', value: 'min'},
@@ -81,7 +80,7 @@ export class DataDogQueryCtrl extends QueryCtrl {
   }
 
   getAs() {
-    return this.$q.when([
+    return Promise.resolve([
       {text: 'None', value: 'None'},
       {text: 'as_count', value: 'as_count'},
       {text: 'as_rate', value: 'as_rate'},
