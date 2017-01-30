@@ -68,7 +68,7 @@ export class DataDogQueryCtrl extends QueryCtrl {
 
   getMetrics() {
     return this.datasource.metricFindQuery()
-    .then(this.transformToSegments(true));
+    .then(this.uiSegmentSrv.transformToSegments(true));
   }
 
   getAggregations() {
@@ -90,10 +90,10 @@ export class DataDogQueryCtrl extends QueryCtrl {
 
   getTags(segment) {
     return this.datasource.metricFindTags()
-    .then(this.transformToSegments(false))
+    .then(this.uiSegmentSrv.transformToSegments(false))
     .then(results => {
       if (segment.type !== 'plus-button') {
-        let removeSegment = this.uiSegmentSrv.newSegment({text: this.removeText, value: this.removeText});
+        let removeSegment = this.uiSegmentSrv.newFake(this.removeText);
         results.unshift(removeSegment);
       }
 
@@ -172,24 +172,6 @@ export class DataDogQueryCtrl extends QueryCtrl {
     this.fixTagSegments();
 
     this.panelCtrl.refresh();
-  }
-
-  transformToSegments(addTemplateVars) {
-    return (results) => {
-      var segments = _.map(results, segment => {
-        let newSegment = { value: segment.text, expandable: segment.expandable };
-        return this.uiSegmentSrv.newSegment(newSegment);
-      });
-
-      if (addTemplateVars) {
-        for (let variable of this.templateSrv.variables) {
-          let newSegment = { type: 'template', value: '$' + variable.name, expandable: true };
-          segments.unshift(this.uiSegmentSrv.newSegment(newSegment));
-        }
-      }
-
-      return segments;
-    };
   }
 
   getCollapsedText() {

@@ -101,7 +101,7 @@ var DataDogQueryCtrl = exports.DataDogQueryCtrl = function (_QueryCtrl) {
   }, {
     key: 'getMetrics',
     value: function getMetrics() {
-      return this.datasource.metricFindQuery().then(this.transformToSegments(true));
+      return this.datasource.metricFindQuery().then(this.uiSegmentSrv.transformToSegments(true));
     }
   }, {
     key: 'getAggregations',
@@ -118,9 +118,9 @@ var DataDogQueryCtrl = exports.DataDogQueryCtrl = function (_QueryCtrl) {
     value: function getTags(segment) {
       var _this2 = this;
 
-      return this.datasource.metricFindTags().then(this.transformToSegments(false)).then(function (results) {
+      return this.datasource.metricFindTags().then(this.uiSegmentSrv.transformToSegments(false)).then(function (results) {
         if (segment.type !== 'plus-button') {
-          var removeSegment = _this2.uiSegmentSrv.newSegment({ text: _this2.removeText, value: _this2.removeText });
+          var removeSegment = _this2.uiSegmentSrv.newFake(_this2.removeText);
           results.unshift(removeSegment);
         }
 
@@ -212,48 +212,6 @@ var DataDogQueryCtrl = exports.DataDogQueryCtrl = function (_QueryCtrl) {
       this.fixTagSegments();
 
       this.panelCtrl.refresh();
-    }
-  }, {
-    key: 'transformToSegments',
-    value: function transformToSegments(addTemplateVars) {
-      var _this3 = this;
-
-      return function (results) {
-        var segments = _lodash2.default.map(results, function (segment) {
-          var newSegment = { value: segment.text, expandable: segment.expandable };
-          return _this3.uiSegmentSrv.newSegment(newSegment);
-        });
-
-        if (addTemplateVars) {
-          var _iteratorNormalCompletion = true;
-          var _didIteratorError = false;
-          var _iteratorError = undefined;
-
-          try {
-            for (var _iterator = _this3.templateSrv.variables[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-              var variable = _step.value;
-
-              var newSegment = { type: 'template', value: '$' + variable.name, expandable: true };
-              segments.unshift(_this3.uiSegmentSrv.newSegment(newSegment));
-            }
-          } catch (err) {
-            _didIteratorError = true;
-            _iteratorError = err;
-          } finally {
-            try {
-              if (!_iteratorNormalCompletion && _iterator.return) {
-                _iterator.return();
-              }
-            } finally {
-              if (_didIteratorError) {
-                throw _iteratorError;
-              }
-            }
-          }
-        }
-
-        return segments;
-      };
     }
   }, {
     key: 'getCollapsedText',
