@@ -1,9 +1,9 @@
 'use strict';
 
-System.register(['lodash', './query_builder'], function (_export, _context) {
+System.register(['lodash', './showdown.min.js', './query_builder'], function (_export, _context) {
   "use strict";
 
-  var _, queryBuilder, _createClass, DataDogDatasource;
+  var _, showdown, queryBuilder, _createClass, DataDogDatasource;
 
   function _classCallCheck(instance, Constructor) {
     if (!(instance instanceof Constructor)) {
@@ -38,9 +38,32 @@ System.register(['lodash', './query_builder'], function (_export, _context) {
 
     return kv_object;
   }
+
+  /*
+   * Convert DataDog event text from markdown to pure HTML
+   * http://docs.datadoghq.com/guides/markdown/
+   */
+  function convertDataDogMdToHtml(str) {
+    var MD_START = '%%%\n';
+    var MD_END = '\n%%%';
+
+    var md_start_index = str.indexOf(MD_START) + MD_START.length;
+    var md_end_index = str.indexOf(MD_END);
+    var md = str.substring(md_start_index, md_end_index);
+
+    var converter = new showdown.Converter();
+    return converter.makeHtml(md);
+  }
+
+  function isDataDogMarkdown(str) {
+    var MD_START = '%%%\n';
+    return str.indexOf(MD_START) >= 0;
+  }
   return {
     setters: [function (_lodash) {
       _ = _lodash.default;
+    }, function (_showdownMinJs) {
+      showdown = _showdownMinJs.default;
     }, function (_query_builder) {
       queryBuilder = _query_builder;
     }],
@@ -246,11 +269,17 @@ System.register(['lodash', './query_builder'], function (_export, _context) {
                 });
 
                 return _.map(filteredEvents, function (event) {
+                  var renderedText = eventStream.text;
+                  if (isDataDogMarkdown(eventStream.text)) {
+                    renderedText = convertDataDogMdToHtml(eventStream.text);
+                  }
+                  console.log(renderedText);
+
                   return {
                     annotation: options.annotation,
                     time: event.date_happened * 1000,
                     title: eventStream.title,
-                    text: eventStream.text,
+                    text: renderedText,
                     tags: eventStream.tags
                   };
                 });

@@ -11,6 +11,10 @@ var _lodash = require('lodash');
 
 var _lodash2 = _interopRequireDefault(_lodash);
 
+var _showdownMin = require('./showdown.min.js');
+
+var _showdownMin2 = _interopRequireDefault(_showdownMin);
+
 var _query_builder = require('./query_builder');
 
 var queryBuilder = _interopRequireWildcard(_query_builder);
@@ -204,11 +208,17 @@ var DataDogDatasource = exports.DataDogDatasource = function () {
           });
 
           return _lodash2.default.map(filteredEvents, function (event) {
+            var renderedText = eventStream.text;
+            if (isDataDogMarkdown(eventStream.text)) {
+              renderedText = convertDataDogMdToHtml(eventStream.text);
+            }
+            console.log(renderedText);
+
             return {
               annotation: options.annotation,
               time: event.date_happened * 1000,
               title: eventStream.title,
-              text: eventStream.text,
+              text: renderedText,
               tags: eventStream.tags
             };
           });
@@ -355,5 +365,26 @@ function mapTagsToKVPairs(tags) {
   });
 
   return kv_object;
+}
+
+/*
+ * Convert DataDog event text from markdown to pure HTML
+ * http://docs.datadoghq.com/guides/markdown/
+ */
+function convertDataDogMdToHtml(str) {
+  var MD_START = '%%%\n';
+  var MD_END = '\n%%%';
+
+  var md_start_index = str.indexOf(MD_START) + MD_START.length;
+  var md_end_index = str.indexOf(MD_END);
+  var md = str.substring(md_start_index, md_end_index);
+
+  var converter = new _showdownMin2.default.Converter();
+  return converter.makeHtml(md);
+}
+
+function isDataDogMarkdown(str) {
+  var MD_START = '%%%\n';
+  return str.indexOf(MD_START) >= 0;
 }
 //# sourceMappingURL=datasource.js.map

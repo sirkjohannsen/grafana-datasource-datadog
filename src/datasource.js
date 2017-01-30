@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import showdown from './showdown.min.js';
 import * as queryBuilder from './query_builder';
 
 export class DataDogDatasource {
@@ -173,11 +174,17 @@ export class DataDogDatasource {
         });
 
         return _.map(filteredEvents, event => {
+          let renderedText = eventStream.text;
+          if (isDataDogMarkdown(eventStream.text)) {
+            renderedText = convertDataDogMdToHtml(eventStream.text);
+          }
+          console.log(renderedText);
+
           return {
             annotation: options.annotation,
             time: event.date_happened * 1000,
             title: eventStream.title,
-            text: eventStream.text,
+            text: renderedText,
             tags: eventStream.tags
           };
         });
@@ -312,4 +319,25 @@ function mapTagsToKVPairs(tags) {
   });
 
   return kv_object;
+}
+
+/*
+ * Convert DataDog event text from markdown to pure HTML
+ * http://docs.datadoghq.com/guides/markdown/
+ */
+function convertDataDogMdToHtml(str) {
+  const MD_START = '%%%\n';
+  const MD_END = '\n%%%';
+
+  let md_start_index = str.indexOf(MD_START) + MD_START.length;
+  let md_end_index = str.indexOf(MD_END);
+  let md = str.substring(md_start_index, md_end_index);
+
+  let converter = new showdown.Converter();
+  return converter.makeHtml(md);
+}
+
+function isDataDogMarkdown(str) {
+  const MD_START = '%%%\n';
+  return str.indexOf(MD_START) >= 0;
 }

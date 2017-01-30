@@ -17,6 +17,18 @@ module.exports = function(grunt) {
         src: ['**/*', '!**/*.js', '!**/*.scss'],
         dest: 'dist'
       },
+      vendor_to_dist: {
+        cwd: 'vendor',
+        expand: true,
+        src: ['**/*'],
+        dest: 'dist'
+      },
+      vendor_to_test: {
+        cwd: 'vendor',
+        expand: true,
+        src: ['**/*'],
+        dest: 'dist/test'
+      },
       pluginDef: {
         expand: true,
         src: ['README.md'],
@@ -113,6 +125,8 @@ module.exports = function(grunt) {
     'jshint',
     'jscs',
     'babel',
+    'copy:vendor_to_dist',
+    'copy:vendor_to_test',
     'mochaTest'
   ]);
 
@@ -123,6 +137,7 @@ module.exports = function(grunt) {
     'copy:src_to_dist',
     'copy:pluginDef',
     'babel',
+    'copy:vendor_to_dist',
     'jshint',
     'jscs'
   ]);
