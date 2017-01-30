@@ -47,9 +47,11 @@ System.register(['lodash', './showdown.min.js', './query_builder'], function (_e
     var MD_START = '%%%\n';
     var MD_END = '\n%%%';
 
+    console.log(str);
     var md_start_index = str.indexOf(MD_START) + MD_START.length;
     var md_end_index = str.indexOf(MD_END);
     var md = str.substring(md_start_index, md_end_index);
+    md = removeImagesFromDataDogMarkdown(md);
 
     var converter = new showdown.Converter();
     return converter.makeHtml(md);
@@ -58,6 +60,11 @@ System.register(['lodash', './showdown.min.js', './query_builder'], function (_e
   function isDataDogMarkdown(str) {
     var MD_START = '%%%\n';
     return str.indexOf(MD_START) >= 0;
+  }
+
+  function removeImagesFromDataDogMarkdown(str) {
+    var dataDogImagePattern = /\[{0,1}\!\[.*\]\(https{0,1}\:\/\/p\.datadoghq\.com\/snapshot.+\)/g;
+    return str.replace(dataDogImagePattern, '');
   }
   return {
     setters: [function (_lodash) {

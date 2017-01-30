@@ -329,9 +329,11 @@ function convertDataDogMdToHtml(str) {
   const MD_START = '%%%\n';
   const MD_END = '\n%%%';
 
+  console.log(str);
   let md_start_index = str.indexOf(MD_START) + MD_START.length;
   let md_end_index = str.indexOf(MD_END);
   let md = str.substring(md_start_index, md_end_index);
+  md = removeImagesFromDataDogMarkdown(md);
 
   let converter = new showdown.Converter();
   return converter.makeHtml(md);
@@ -340,4 +342,9 @@ function convertDataDogMdToHtml(str) {
 function isDataDogMarkdown(str) {
   const MD_START = '%%%\n';
   return str.indexOf(MD_START) >= 0;
+}
+
+function removeImagesFromDataDogMarkdown(str) {
+  let dataDogImagePattern = /\[{0,1}\!\[.*\]\(https{0,1}\:\/\/p\.datadoghq\.com\/snapshot.+\)/g;
+  return str.replace(dataDogImagePattern, '');
 }
