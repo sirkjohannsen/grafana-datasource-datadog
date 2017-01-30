@@ -7,11 +7,13 @@ import * as queryBuilder from './query_builder';
 
 export class DataDogQueryCtrl extends QueryCtrl {
 
-  constructor($scope, $injector, $q, uiSegmentSrv)  {
+  constructor($scope, $injector, $q, uiSegmentSrv, templateSrv)  {
     super($scope, $injector);
     this.removeText = '-- remove tag --';
     this.$q = $q;
     this.uiSegmentSrv = uiSegmentSrv;
+    this.templateSrv = templateSrv;
+
     if (this.target.aggregation) {
       this.aggregationSegment = new uiSegmentSrv.newSegment(
         this.target.aggregation
@@ -36,21 +38,16 @@ export class DataDogQueryCtrl extends QueryCtrl {
       });
     }
 
-    this.tagSegments = [];
-    var self = this;
     this.target.tags = this.target.tags || [];
-    _.map(this.target.tags, function (tag) {
-      self.tagSegments.push(uiSegmentSrv.newSegment(tag));
-    });
-
+    this.tagSegments = this.target.tags.map(uiSegmentSrv.newSegment);
     this.fixTagSegments();
 
     this.functions = [];
     this.target.functions = this.target.functions || [];
-    _.map(this.target.functions, function (func) {
+    this.functions = _.map(this.target.functions, func => {
       var f = dfunc.createFuncInstance(func.funcDef, {withDefaultParams: false});
       f.params = func.params.slice();
-      self.functions.push(f);
+      return f;
     });
 
     if (this.target.as) {
@@ -70,7 +67,8 @@ export class DataDogQueryCtrl extends QueryCtrl {
   }
 
   getMetrics() {
-    return this.datasource.metricFindQuery();
+    return this.datasource.metricFindQuery()
+    .then(this.transformToSegments(true));
   }
 
   getAggregations() {
@@ -91,18 +89,12 @@ export class DataDogQueryCtrl extends QueryCtrl {
   }
 
   getTags(segment) {
-    var self = this;
-    return this.datasource.metricFindTags().then(function (results) {
-      var first = results && results[0];
-      var resultsHaveRemoveText = first && first.text === self.removeText;
-      var segmentIsPlusButton = segment.type === 'plus-button';
-      // var removeResultsText = resultsHaveRemoveText && segmentIsPlusButton;
-      if (resultsHaveRemoveText) {
-        results.splice(0, 1);
-      }
-
-      if (!segmentIsPlusButton) {
-        results.splice(0, 0, {text: self.removeText, value: self.removeText});
+    return this.datasource.metricFindTags()
+    .then(this.transformToSegments(false))
+    .then(results => {
+      if (segment.type !== 'plus-button') {
+        let removeSegment = this.uiSegmentSrv.newSegment({text: this.removeText, value: this.removeText});
+        results.unshift(removeSegment);
       }
 
       return results;
@@ -172,19 +164,32 @@ export class DataDogQueryCtrl extends QueryCtrl {
     if (segment.value === this.removeText) {
       this.tagSegments.splice(index, 1);
     }
-    console.log("target segments", this.tagSegments);
-    this.target.tags = _.filter(_.map(this.tagSegments, function (segment) {
-      return segment.value;
-    }));
-    console.log("setting target tags", this.target.tags);
+
+    let realSegments = _.filter(this.tagSegments, segment => segment.value);
+    this.target.tags = realSegments.map(segment => segment.value);
+
+    this.tagSegments = _.map(this.target.tags, this.uiSegmentSrv.newSegment);
+    this.fixTagSegments();
+
     this.panelCtrl.refresh();
+  }
 
-    var count = this.tagSegments.length;
-    var lastSegment = this.tagSegments[Math.max(count-1, 0)];
+  transformToSegments(addTemplateVars) {
+    return (results) => {
+      var segments = _.map(results, segment => {
+        let newSegment = { value: segment.text, expandable: segment.expandable };
+        return this.uiSegmentSrv.newSegment(newSegment);
+      });
 
-    if (!lastSegment || lastSegment.type !== 'plus-button') {
-      this.tagSegments.push(this.uiSegmentSrv.newPlusButton());
-    }
+      if (addTemplateVars) {
+        for (let variable of this.templateSrv.variables) {
+          let newSegment = { type: 'template', value: '$' + variable.name, expandable: true };
+          segments.unshift(this.uiSegmentSrv.newSegment(newSegment));
+        }
+      }
+
+      return segments;
+    };
   }
 
   getCollapsedText() {

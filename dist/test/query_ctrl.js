@@ -38,7 +38,7 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 var DataDogQueryCtrl = exports.DataDogQueryCtrl = function (_QueryCtrl) {
   _inherits(DataDogQueryCtrl, _QueryCtrl);
 
-  function DataDogQueryCtrl($scope, $injector, $q, uiSegmentSrv) {
+  function DataDogQueryCtrl($scope, $injector, $q, uiSegmentSrv, templateSrv) {
     _classCallCheck(this, DataDogQueryCtrl);
 
     var _this = _possibleConstructorReturn(this, (DataDogQueryCtrl.__proto__ || Object.getPrototypeOf(DataDogQueryCtrl)).call(this, $scope, $injector));
@@ -46,6 +46,8 @@ var DataDogQueryCtrl = exports.DataDogQueryCtrl = function (_QueryCtrl) {
     _this.removeText = '-- remove tag --';
     _this.$q = $q;
     _this.uiSegmentSrv = uiSegmentSrv;
+    _this.templateSrv = templateSrv;
+
     if (_this.target.aggregation) {
       _this.aggregationSegment = new uiSegmentSrv.newSegment(_this.target.aggregation);
     } else {
@@ -66,21 +68,16 @@ var DataDogQueryCtrl = exports.DataDogQueryCtrl = function (_QueryCtrl) {
       });
     }
 
-    _this.tagSegments = [];
-    var self = _this;
     _this.target.tags = _this.target.tags || [];
-    _lodash2.default.map(_this.target.tags, function (tag) {
-      self.tagSegments.push(uiSegmentSrv.newSegment(tag));
-    });
-
+    _this.tagSegments = _this.target.tags.map(uiSegmentSrv.newSegment);
     _this.fixTagSegments();
 
     _this.functions = [];
     _this.target.functions = _this.target.functions || [];
-    _lodash2.default.map(_this.target.functions, function (func) {
+    _this.functions = _lodash2.default.map(_this.target.functions, function (func) {
       var f = _dfunc2.default.createFuncInstance(func.funcDef, { withDefaultParams: false });
       f.params = func.params.slice();
-      self.functions.push(f);
+      return f;
     });
 
     if (_this.target.as) {
@@ -104,7 +101,7 @@ var DataDogQueryCtrl = exports.DataDogQueryCtrl = function (_QueryCtrl) {
   }, {
     key: 'getMetrics',
     value: function getMetrics() {
-      return this.datasource.metricFindQuery();
+      return this.datasource.metricFindQuery().then(this.transformToSegments(true));
     }
   }, {
     key: 'getAggregations',
@@ -119,18 +116,12 @@ var DataDogQueryCtrl = exports.DataDogQueryCtrl = function (_QueryCtrl) {
   }, {
     key: 'getTags',
     value: function getTags(segment) {
-      var self = this;
-      return this.datasource.metricFindTags().then(function (results) {
-        var first = results && results[0];
-        var resultsHaveRemoveText = first && first.text === self.removeText;
-        var segmentIsPlusButton = segment.type === 'plus-button';
-        // var removeResultsText = resultsHaveRemoveText && segmentIsPlusButton;
-        if (resultsHaveRemoveText) {
-          results.splice(0, 1);
-        }
+      var _this2 = this;
 
-        if (!segmentIsPlusButton) {
-          results.splice(0, 0, { text: self.removeText, value: self.removeText });
+      return this.datasource.metricFindTags().then(this.transformToSegments(false)).then(function (results) {
+        if (segment.type !== 'plus-button') {
+          var removeSegment = _this2.uiSegmentSrv.newSegment({ text: _this2.removeText, value: _this2.removeText });
+          results.unshift(removeSegment);
         }
 
         return results;
@@ -209,19 +200,60 @@ var DataDogQueryCtrl = exports.DataDogQueryCtrl = function (_QueryCtrl) {
       if (segment.value === this.removeText) {
         this.tagSegments.splice(index, 1);
       }
-      console.log("target segments", this.tagSegments);
-      this.target.tags = _lodash2.default.filter(_lodash2.default.map(this.tagSegments, function (segment) {
+
+      var realSegments = _lodash2.default.filter(this.tagSegments, function (segment) {
         return segment.value;
-      }));
-      console.log("setting target tags", this.target.tags);
+      });
+      this.target.tags = realSegments.map(function (segment) {
+        return segment.value;
+      });
+
+      this.tagSegments = _lodash2.default.map(this.target.tags, this.uiSegmentSrv.newSegment);
+      this.fixTagSegments();
+
       this.panelCtrl.refresh();
+    }
+  }, {
+    key: 'transformToSegments',
+    value: function transformToSegments(addTemplateVars) {
+      var _this3 = this;
 
-      var count = this.tagSegments.length;
-      var lastSegment = this.tagSegments[Math.max(count - 1, 0)];
+      return function (results) {
+        var segments = _lodash2.default.map(results, function (segment) {
+          var newSegment = { value: segment.text, expandable: segment.expandable };
+          return _this3.uiSegmentSrv.newSegment(newSegment);
+        });
 
-      if (!lastSegment || lastSegment.type !== 'plus-button') {
-        this.tagSegments.push(this.uiSegmentSrv.newPlusButton());
-      }
+        if (addTemplateVars) {
+          var _iteratorNormalCompletion = true;
+          var _didIteratorError = false;
+          var _iteratorError = undefined;
+
+          try {
+            for (var _iterator = _this3.templateSrv.variables[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+              var variable = _step.value;
+
+              var newSegment = { type: 'template', value: '$' + variable.name, expandable: true };
+              segments.unshift(_this3.uiSegmentSrv.newSegment(newSegment));
+            }
+          } catch (err) {
+            _didIteratorError = true;
+            _iteratorError = err;
+          } finally {
+            try {
+              if (!_iteratorNormalCompletion && _iterator.return) {
+                _iterator.return();
+              }
+            } finally {
+              if (_didIteratorError) {
+                throw _iteratorError;
+              }
+            }
+          }
+        }
+
+        return segments;
+      };
     }
   }, {
     key: 'getCollapsedText',
