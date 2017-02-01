@@ -146,7 +146,7 @@ System.register(['lodash', './dfunc', 'app/plugins/sdk', './func_editor', './add
           value: function getTags(segment) {
             var _this2 = this;
 
-            return this.datasource.metricFindTags().then(this.uiSegmentSrv.transformToSegments(false)).then(function (results) {
+            return this.datasource.tagFindQuery().then(this.uiSegmentSrv.transformToSegments(true)).then(function (results) {
               if (segment.type !== 'plus-button') {
                 var removeSegment = _this2.uiSegmentSrv.newFake(_this2.removeText);
                 results.unshift(removeSegment);

@@ -88,8 +88,8 @@ export class DataDogQueryCtrl extends QueryCtrl {
   }
 
   getTags(segment) {
-    return this.datasource.metricFindTags()
-    .then(this.uiSegmentSrv.transformToSegments(false))
+    return this.datasource.tagFindQuery()
+    .then(this.uiSegmentSrv.transformToSegments(true))
     .then(results => {
       if (segment.type !== 'plus-button') {
         let removeSegment = this.uiSegmentSrv.newFake(this.removeText);
