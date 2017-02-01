@@ -171,7 +171,7 @@ var DataDogDatasource = exports.DataDogDatasource = function () {
       });
 
       var queryString = queries.join(',');
-      queryString = this.templateSrv.replace(queryString, options.scopedVars);
+      queryString = this.templateSrv.replace(queryString, options.scopedVars, dataDogTagFormat);
 
       var params = {
         from: from,
@@ -397,5 +397,12 @@ function isDataDogMarkdown(str) {
 function removeImagesFromDataDogMarkdown(str) {
   var dataDogImagePattern = /\[{0,1}\!\[.*\]\(https{0,1}\:\/\/p\.datadoghq\.com\/snapshot.+\)/g;
   return str.replace(dataDogImagePattern, '');
+}
+
+function dataDogTagFormat(value) {
+  if (_lodash2.default.isArray(value)) {
+    return value.join(',');
+  }
+  return value;
 }
 //# sourceMappingURL=datasource.js.map
