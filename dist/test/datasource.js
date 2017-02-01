@@ -79,8 +79,12 @@ var DataDogDatasource = exports.DataDogDatasource = function () {
     }
   }, {
     key: 'metricFindQuery',
-    value: function metricFindQuery() {
+    value: function metricFindQuery(query) {
       var _this = this;
+
+      if (query === 'tag') {
+        return this.metricFindTags();
+      }
 
       if (this._cached_metrics) {
         return Promise.resolve(this._cached_metrics);

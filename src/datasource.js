@@ -52,7 +52,11 @@ export class DataDogDatasource {
     });
   }
 
-  metricFindQuery() {
+  metricFindQuery(query) {
+    if (query === 'tag') {
+      return this.metricFindTags();
+    }
+
     if (this._cached_metrics) {
       return Promise.resolve(this._cached_metrics);
     }
