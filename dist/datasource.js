@@ -47,7 +47,6 @@ System.register(['lodash', './showdown.min.js', './query_builder'], function (_e
     var MD_START = '%%%\n';
     var MD_END = '\n%%%';
 
-    console.log(str);
     var md_start_index = str.indexOf(MD_START) + MD_START.length;
     var md_end_index = str.indexOf(MD_END);
     var md = str.substring(md_start_index, md_end_index);
@@ -141,8 +140,8 @@ System.register(['lodash', './showdown.min.js', './query_builder'], function (_e
             });
           }
         }, {
-          key: 'metricFindTags',
-          value: function metricFindTags() {
+          key: 'tagFindQuery',
+          value: function tagFindQuery() {
             return this.getTagsFromCache().then(function (tags) {
               return _.map(tags, function (hosts, tag) {
                 return {
@@ -158,7 +157,7 @@ System.register(['lodash', './showdown.min.js', './query_builder'], function (_e
             var _this = this;
 
             if (query === 'tag') {
-              return this.metricFindTags();
+              return this.tagFindQuery();
             }
 
             if (this._cached_metrics) {
@@ -172,10 +171,9 @@ System.register(['lodash', './showdown.min.js', './query_builder'], function (_e
             var d = new Date();
             d.setDate(d.getDate() - 1);
             var from = Math.floor(d.getTime() / 1000);
-            var params = { from: from };
 
-            this.fetching = this.invokeDataDogApiRequest('/metrics', params).then(function (result) {
-              _this._cached_metrics = _.map(result.metrics, function (metric) {
+            this.fetching = this.getMetrics(from).then(function (metrics) {
+              _this._cached_metrics = _.map(metrics, function (metric) {
                 return {
                   text: metric,
                   value: metric
@@ -291,7 +289,6 @@ System.register(['lodash', './showdown.min.js', './query_builder'], function (_e
                   if (isDataDogMarkdown(eventStream.text)) {
                     renderedText = convertDataDogMdToHtml(eventStream.text);
                   }
-                  console.log(renderedText);
 
                   return {
                     annotation: options.annotation,
@@ -322,6 +319,23 @@ System.register(['lodash', './showdown.min.js', './query_builder'], function (_e
             return this.invokeDataDogApiRequest('/search', params).then(function (result) {
               if (result && result.results) {
                 return result.results[entity];
+              }
+            });
+          }
+        }, {
+          key: 'getMetrics',
+          value: function getMetrics(timeFrom) {
+            var params = {};
+
+            if (timeFrom) {
+              params.from = timeFrom;
+            }
+
+            return this.invokeDataDogApiRequest('/metrics', params).then(function (result) {
+              if (result.metrics) {
+                return result.metrics;
+              } else {
+                return [];
               }
             });
           }

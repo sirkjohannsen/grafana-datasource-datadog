@@ -40,7 +40,7 @@ export class DataDogDatasource {
     });
   }
 
-  metricFindTags() {
+  tagFindQuery() {
     return this.getTagsFromCache()
     .then(tags => {
       return _.map(tags, (hosts, tag) => {
@@ -54,7 +54,7 @@ export class DataDogDatasource {
 
   metricFindQuery(query) {
     if (query === 'tag') {
-      return this.metricFindTags();
+      return this.tagFindQuery();
     }
 
     if (this._cached_metrics) {
@@ -68,11 +68,9 @@ export class DataDogDatasource {
     var d = new Date();
     d.setDate(d.getDate() - 1);
     var from = Math.floor(d.getTime() / 1000);
-    var params = { from: from };
 
-    this.fetching = this.invokeDataDogApiRequest('/metrics', params)
-    .then(result => {
-      this._cached_metrics = _.map(result.metrics, metric => {
+    this.fetching = this.getMetrics(from).then(metrics => {
+      this._cached_metrics = _.map(metrics, metric => {
         return {
           text: metric,
           value: metric,
@@ -182,7 +180,6 @@ export class DataDogDatasource {
           if (isDataDogMarkdown(eventStream.text)) {
             renderedText = convertDataDogMdToHtml(eventStream.text);
           }
-          console.log(renderedText);
 
           return {
             annotation: options.annotation,
@@ -214,6 +211,23 @@ export class DataDogDatasource {
     .then(result => {
       if (result && result.results) {
         return result.results[entity];
+      }
+    });
+  }
+
+  getMetrics(timeFrom) {
+    let params = {};
+
+    if (timeFrom) {
+      params.from = timeFrom;
+    }
+
+    return this.invokeDataDogApiRequest('/metrics', params)
+    .then(result => {
+      if (result.metrics) {
+        return result.metrics;
+      } else {
+        return [];
       }
     });
   }
@@ -333,7 +347,6 @@ function convertDataDogMdToHtml(str) {
   const MD_START = '%%%\n';
   const MD_END = '\n%%%';
 
-  console.log(str);
   let md_start_index = str.indexOf(MD_START) + MD_START.length;
   let md_end_index = str.indexOf(MD_END);
   let md = str.substring(md_start_index, md_end_index);
