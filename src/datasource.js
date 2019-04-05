@@ -302,7 +302,7 @@ export class DataDogDatasource {
       if (error.statusText) {
         message = error.status + ' ' + error.statusText;
         throw {message: message};
-      } else if (error.err.statusText) {
+      } else if (error.err && error.err.statusText) {
         throw {message: error.err.statusText};
       } else {
         throw {message: message};
