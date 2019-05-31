@@ -20,7 +20,7 @@
       "large": "img/datadog.png"
     },
     "links": [
-      {"name": "GitHub", "url": "https://github.com/voidfiles/grafana-datasource-datagog"},
+      {"name": "GitHub", "url": "https://github.com/voidfiles/grafana-datasource-datadog"},
       {"name": "License", "url": "https://github.com/voidfiles/grafana-datasource-datagog/blob/master/LICENSE"}
     ],
     "version": "0.0.1",
