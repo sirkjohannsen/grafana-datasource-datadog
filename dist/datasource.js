@@ -254,9 +254,8 @@ System.register(['lodash', './showdown.min.js', './query_builder'], function (_e
 
             return this.invokeDataDogApiRequest('/query', params).then(function (result) {
               var dataResponse = _.map(result.series, function (series, i) {
-                var target = targets[i];
                 return {
-                  'target': target.alias || series.expression,
+                  'target': series.expression,
                   'datapoints': _.map(series.pointlist, function (point) {
                     return [point[1], point[0]];
                   })
