@@ -1,7 +1,7 @@
 <query-editor-row query-ctrl="ctrl" has-text-edit-mode="true" can-collapse="true">
 
   <div class="gf-form" ng-if="ctrl.target.rawQuery">
-    <input type="text" class="gf-form-input" ng-model="ctrl.target.query" spellcheck="false" ng-blur="ctrl.refresh()"></input>
+    <input type="text" class="gf-form-input" ng-model="ctrl.target.query" spellcheck="false" ng-blur="ctrl.checkQuery()"></input>
   </div>
 
   <div ng-if="!ctrl.target.rawQuery">
@@ -21,7 +21,7 @@
       </div>
 
       <div class="gf-form gf-form--grow">
-        <div class="gf-form-label gf-form-label--grow"></div>
+        <div class="gf-form-label gf-form-label--grow"></div> d
       </div>
     </div>
 

@@ -125,6 +125,25 @@ System.register(['lodash', './dfunc', 'app/plugins/sdk', './func_editor', './add
           key: 'toggleEditorMode',
           value: function toggleEditorMode() {
             this.target.rawQuery = !this.target.rawQuery;
+            if (this.target.rawQuery)
+              this.target.query = queryBuilder.buildQuery(this.target);
+          }
+        }, {
+          key: 'getCollapsedText',
+          value: function getCollapsedText() {
+            if (this.target.rawQuery) {
+              return this.target.query;
+            } else {
+              return queryBuilder.buildQuery(this.target);
+            }
+          }
+        }, {
+          key: 'checkQuery',
+          value: function checkQuery() {
+            if (!(this.target.query || this.target.query.length != 0)) 
+            // to avoid 400 Bad Request, this is the default query
+              this.target.query = 'undefined:undefined{*}';
+            this.panelCtrl.refresh();
           }
         }, {
           key: 'getMetrics',
@@ -170,11 +189,7 @@ System.register(['lodash', './dfunc', 'app/plugins/sdk', './func_editor', './add
         }, {
           key: 'asChanged',
           value: function asChanged() {
-            if (this.asSegment.value === 'None') {
-              this.target.as = null;
-            } else {
-              this.target.as = this.asSegment.value;
-            }
+            this.target.as = this.asSegment.value;
             this.panelCtrl.refresh();
           }
         }, {
@@ -240,15 +255,6 @@ System.register(['lodash', './dfunc', 'app/plugins/sdk', './func_editor', './add
             this.fixTagSegments();
 
             this.panelCtrl.refresh();
-          }
-        }, {
-          key: 'getCollapsedText',
-          value: function getCollapsedText() {
-            if (this.target.rawQuery) {
-              return this.target.query;
-            } else {
-              return queryBuilder.buildQuery(this.target);
-            }
           }
         }]);
 
