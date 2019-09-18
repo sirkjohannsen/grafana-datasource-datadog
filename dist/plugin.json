@@ -23,7 +23,7 @@
       {"name": "GitHub", "url": "https://github.com/voidfiles/grafana-datasource-datagog"},
       {"name": "License", "url": "https://github.com/voidfiles/grafana-datasource-datagog/blob/master/LICENSE"}
     ],
-    "version": "0.0.1",
+    "version": "0.7",
     "updated": "2016-12-18"
   },
 

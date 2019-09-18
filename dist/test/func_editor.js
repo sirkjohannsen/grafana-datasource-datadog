@@ -1,33 +1,24 @@
-'use strict';
+"use strict";
 
-var _angular = require('angular');
+var _angular = _interopRequireDefault(require("angular"));
 
-var _angular2 = _interopRequireDefault(_angular);
+var _lodash = _interopRequireDefault(require("lodash"));
 
-var _lodash = require('lodash');
+var _jquery = _interopRequireDefault(require("jquery"));
 
-var _lodash2 = _interopRequireDefault(_lodash);
-
-var _jquery = require('jquery');
-
-var _jquery2 = _interopRequireDefault(_jquery);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
 'use strict';
 
-_angular2.default.module('grafana.directives').directive('datadogFuncEditor', function ($compile, templateSrv) {
-
+_angular["default"].module('grafana.directives').directive('datadogFuncEditor', function ($compile, templateSrv) {
   var funcSpanTemplate = '<a ng-click="">{{func.def.name}}</a><span>(</span>';
   var paramTemplate = '<input type="text" style="display:none"' + ' class="input-mini tight-form-func-param"></input>';
-
   var funcControlsTemplate = '<div class="tight-form-func-controls">' + '<span class="pointer fa fa-arrow-left"></span>' + '<span class="pointer fa fa-question-circle"></span>' + '<span class="pointer fa fa-remove" ></span>' + '<span class="pointer fa fa-arrow-right"></span>' + '</div>';
-
   return {
     restrict: 'A',
     link: function postLink($scope, elem) {
-      var $funcLink = (0, _jquery2.default)(funcSpanTemplate);
-      var $funcControls = (0, _jquery2.default)(funcControlsTemplate);
+      var $funcLink = (0, _jquery["default"])(funcSpanTemplate);
+      var $funcControls = (0, _jquery["default"])(funcControlsTemplate);
       var ctrl = $scope.ctrl;
       var func = $scope.func;
       var funcDef = func.def;
@@ -36,19 +27,16 @@ _angular2.default.module('grafana.directives').directive('datadogFuncEditor', fu
 
       function clickFuncParam(paramIndex) {
         /*jshint validthis:true */
-
-        var $link = (0, _jquery2.default)(this);
+        var $link = (0, _jquery["default"])(this);
         var $input = $link.next();
-
         $input.val(func.params[paramIndex]);
         $input.css('width', $link.width() + 16 + 'px');
-
         $link.hide();
         $input.show();
         $input.focus();
         $input.select();
-
         var typeahead = $input.data('typeahead');
+
         if (typeahead) {
           $input.val('');
           typeahead.lookup();
@@ -71,20 +59,17 @@ _angular2.default.module('grafana.directives').directive('datadogFuncEditor', fu
 
       function inputBlur(paramIndex) {
         /*jshint validthis:true */
-        var $input = (0, _jquery2.default)(this);
+        var $input = (0, _jquery["default"])(this);
         var $link = $input.prev();
         var newValue = $input.val();
 
         if (newValue !== '' || func.def.params[paramIndex].optional) {
           $link.html(templateSrv.highlightVariablesAsHtml(newValue));
-
           func.updateParam($input.val(), paramIndex);
           scheduledRelinkIfNeeded();
-
           $scope.$apply(function () {
             ctrl.targetChanged();
           });
-
           $input.hide();
           $link.show();
         }
@@ -104,10 +89,10 @@ _angular2.default.module('grafana.directives').directive('datadogFuncEditor', fu
 
       function addTypeahead($input, paramIndex) {
         $input.attr('data-provide', 'typeahead');
-
         var options = funcDef.params[paramIndex].options;
+
         if (funcDef.params[paramIndex].type === 'int') {
-          options = _lodash2.default.map(options, function (val) {
+          options = _lodash["default"].map(options, function (val) {
             return val.toString();
           });
         }
@@ -123,8 +108,8 @@ _angular2.default.module('grafana.directives').directive('datadogFuncEditor', fu
             return value;
           }
         });
-
         var typeahead = $input.data('typeahead');
+
         typeahead.lookup = function () {
           this.query = this.$element.val() || '';
           return this.process(this.source);
@@ -143,7 +128,6 @@ _angular2.default.module('grafana.directives').directive('datadogFuncEditor', fu
 
         elem.addClass('show-function-controls');
         targetDiv.addClass('has-open-function');
-
         $funcControls.show();
       }
 
@@ -151,36 +135,32 @@ _angular2.default.module('grafana.directives').directive('datadogFuncEditor', fu
         $funcControls.appendTo(elem);
         $funcLink.appendTo(elem);
 
-        _lodash2.default.each(funcDef.params, function (param, index) {
+        _lodash["default"].each(funcDef.params, function (param, index) {
           if (param.optional && func.params.length <= index) {
             return;
           }
 
           if (index > 0) {
-            (0, _jquery2.default)('<span>, </span>').appendTo(elem);
+            (0, _jquery["default"])('<span>, </span>').appendTo(elem);
           }
 
           var paramValue = templateSrv.highlightVariablesAsHtml(func.params[index]);
-          var $paramLink = (0, _jquery2.default)('<a ng-click="" class="datadog-func-param-link">' + paramValue + '</a>');
-          var $input = (0, _jquery2.default)(paramTemplate);
-
+          var $paramLink = (0, _jquery["default"])('<a ng-click="" class="datadog-func-param-link">' + paramValue + '</a>');
+          var $input = (0, _jquery["default"])(paramTemplate);
           paramCountAtLink++;
-
           $paramLink.appendTo(elem);
           $input.appendTo(elem);
-
-          $input.blur(_lodash2.default.partial(inputBlur, index));
+          $input.blur(_lodash["default"].partial(inputBlur, index));
           $input.keyup(inputKeyDown);
-          $input.keypress(_lodash2.default.partial(inputKeyPress, index));
-          $paramLink.click(_lodash2.default.partial(clickFuncParam, index));
+          $input.keypress(_lodash["default"].partial(inputKeyPress, index));
+          $paramLink.click(_lodash["default"].partial(clickFuncParam, index));
 
           if (funcDef.params[index].options) {
             addTypeahead($input, index);
           }
         });
 
-        (0, _jquery2.default)('<span>)</span>').appendTo(elem);
-
+        (0, _jquery["default"])('<span>)</span>').appendTo(elem);
         $compile(elem.contents())($scope);
       }
 
@@ -199,7 +179,8 @@ _angular2.default.module('grafana.directives').directive('datadogFuncEditor', fu
 
       function registerFuncControlsActions() {
         $funcControls.click(function (e) {
-          var $target = (0, _jquery2.default)(e.target);
+          var $target = (0, _jquery["default"])(e.target);
+
           if ($target.hasClass('fa-remove')) {
             toggleFuncControls();
             $scope.$apply(function () {
@@ -210,7 +191,8 @@ _angular2.default.module('grafana.directives').directive('datadogFuncEditor', fu
 
           if ($target.hasClass('fa-arrow-left')) {
             $scope.$apply(function () {
-              _lodash2.default.move(ctrl.functions, $scope.$index, $scope.$index - 1);
+              _lodash["default"].move(ctrl.functions, $scope.$index, $scope.$index - 1);
+
               ctrl.targetChanged();
             });
             return;
@@ -218,7 +200,8 @@ _angular2.default.module('grafana.directives').directive('datadogFuncEditor', fu
 
           if ($target.hasClass('fa-arrow-right')) {
             $scope.$apply(function () {
-              _lodash2.default.move(ctrl.functions, $scope.$index, $scope.$index + 1);
+              _lodash["default"].move(ctrl.functions, $scope.$index, $scope.$index + 1);
+
               ctrl.targetChanged();
             });
             return;
@@ -233,7 +216,6 @@ _angular2.default.module('grafana.directives').directive('datadogFuncEditor', fu
 
       function relink() {
         elem.children().remove();
-
         addElementsAndCompile();
         ifJustAddedFocusFistParam();
         registerFuncControlsToggle();

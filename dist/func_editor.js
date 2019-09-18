@@ -1,6 +1,6 @@
-'use strict';
+"use strict";
 
-System.register(['angular', 'lodash', 'jquery'], function (_export, _context) {
+System.register(["angular", "lodash", "jquery"], function (_export, _context) {
   "use strict";
 
   var angular, _, $;
@@ -14,16 +14,12 @@ System.register(['angular', 'lodash', 'jquery'], function (_export, _context) {
       $ = _jquery.default;
     }],
     execute: function () {
-
       'use strict';
 
       angular.module('grafana.directives').directive('datadogFuncEditor', function ($compile, templateSrv) {
-
         var funcSpanTemplate = '<a ng-click="">{{func.def.name}}</a><span>(</span>';
         var paramTemplate = '<input type="text" style="display:none"' + ' class="input-mini tight-form-func-param"></input>';
-
         var funcControlsTemplate = '<div class="tight-form-func-controls">' + '<span class="pointer fa fa-arrow-left"></span>' + '<span class="pointer fa fa-question-circle"></span>' + '<span class="pointer fa fa-remove" ></span>' + '<span class="pointer fa fa-arrow-right"></span>' + '</div>';
-
         return {
           restrict: 'A',
           link: function postLink($scope, elem) {
@@ -37,19 +33,16 @@ System.register(['angular', 'lodash', 'jquery'], function (_export, _context) {
 
             function clickFuncParam(paramIndex) {
               /*jshint validthis:true */
-
               var $link = $(this);
               var $input = $link.next();
-
               $input.val(func.params[paramIndex]);
               $input.css('width', $link.width() + 16 + 'px');
-
               $link.hide();
               $input.show();
               $input.focus();
               $input.select();
-
               var typeahead = $input.data('typeahead');
+
               if (typeahead) {
                 $input.val('');
                 typeahead.lookup();
@@ -78,14 +71,11 @@ System.register(['angular', 'lodash', 'jquery'], function (_export, _context) {
 
               if (newValue !== '' || func.def.params[paramIndex].optional) {
                 $link.html(templateSrv.highlightVariablesAsHtml(newValue));
-
                 func.updateParam($input.val(), paramIndex);
                 scheduledRelinkIfNeeded();
-
                 $scope.$apply(function () {
                   ctrl.targetChanged();
                 });
-
                 $input.hide();
                 $link.show();
               }
@@ -105,8 +95,8 @@ System.register(['angular', 'lodash', 'jquery'], function (_export, _context) {
 
             function addTypeahead($input, paramIndex) {
               $input.attr('data-provide', 'typeahead');
-
               var options = funcDef.params[paramIndex].options;
+
               if (funcDef.params[paramIndex].type === 'int') {
                 options = _.map(options, function (val) {
                   return val.toString();
@@ -124,8 +114,8 @@ System.register(['angular', 'lodash', 'jquery'], function (_export, _context) {
                   return value;
                 }
               });
-
               var typeahead = $input.data('typeahead');
+
               typeahead.lookup = function () {
                 this.query = this.$element.val() || '';
                 return this.process(this.source);
@@ -144,7 +134,6 @@ System.register(['angular', 'lodash', 'jquery'], function (_export, _context) {
 
               elem.addClass('show-function-controls');
               targetDiv.addClass('has-open-function');
-
               $funcControls.show();
             }
 
@@ -164,12 +153,9 @@ System.register(['angular', 'lodash', 'jquery'], function (_export, _context) {
                 var paramValue = templateSrv.highlightVariablesAsHtml(func.params[index]);
                 var $paramLink = $('<a ng-click="" class="datadog-func-param-link">' + paramValue + '</a>');
                 var $input = $(paramTemplate);
-
                 paramCountAtLink++;
-
                 $paramLink.appendTo(elem);
                 $input.appendTo(elem);
-
                 $input.blur(_.partial(inputBlur, index));
                 $input.keyup(inputKeyDown);
                 $input.keypress(_.partial(inputKeyPress, index));
@@ -181,7 +167,6 @@ System.register(['angular', 'lodash', 'jquery'], function (_export, _context) {
               });
 
               $('<span>)</span>').appendTo(elem);
-
               $compile(elem.contents())($scope);
             }
 
@@ -201,6 +186,7 @@ System.register(['angular', 'lodash', 'jquery'], function (_export, _context) {
             function registerFuncControlsActions() {
               $funcControls.click(function (e) {
                 var $target = $(e.target);
+
                 if ($target.hasClass('fa-remove')) {
                   toggleFuncControls();
                   $scope.$apply(function () {
@@ -212,6 +198,7 @@ System.register(['angular', 'lodash', 'jquery'], function (_export, _context) {
                 if ($target.hasClass('fa-arrow-left')) {
                   $scope.$apply(function () {
                     _.move(ctrl.functions, $scope.$index, $scope.$index - 1);
+
                     ctrl.targetChanged();
                   });
                   return;
@@ -220,6 +207,7 @@ System.register(['angular', 'lodash', 'jquery'], function (_export, _context) {
                 if ($target.hasClass('fa-arrow-right')) {
                   $scope.$apply(function () {
                     _.move(ctrl.functions, $scope.$index, $scope.$index + 1);
+
                     ctrl.targetChanged();
                   });
                   return;
@@ -234,7 +222,6 @@ System.register(['angular', 'lodash', 'jquery'], function (_export, _context) {
 
             function relink() {
               elem.children().remove();
-
               addElementsAndCompile();
               ifJustAddedFocusFistParam();
               registerFuncControlsToggle();

@@ -1,84 +1,103 @@
 'use strict';
 
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.buildQuery = buildQuery;
+System.register(['lodash', './dfunc'], function (_export, _context) {
+  "use strict";
 
-var _lodash = require('lodash');
+  var _, dfunc;
 
-var _lodash2 = _interopRequireDefault(_lodash);
+  function buildQuery(target, adhocFilters) {
+    var aggregation = target.aggregation,
+        metric = target.metric,
+        tags = target.tags,
+        functions = target.functions;
+    var query = aggregation + ':' + metric;
+    var functionInstances = getFunctionInstances(functions);
 
-var _dfunc = require('./dfunc');
+    if (tags && tags.length || adhocFilters && adhocFilters.length) {
+      query += '{';
 
-var _dfunc2 = _interopRequireDefault(_dfunc);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function buildQuery(target, adhocFilters) {
-  var aggregation = target.aggregation,
-      metric = target.metric,
-      tags = target.tags,
-      functions = target.functions;
-
-  var query = aggregation + ':' + metric;
-
-  var functionInstances = getFunctionInstances(functions);
-
-  if (tags && tags.length || adhocFilters && adhocFilters.length) {
-    query += '{';
-
-    if (tags && tags.length) {
-      query += tags.join(',');
-    }
-
-    if (adhocFilters && adhocFilters.length) {
-      var adhocTags = buildAdHocFilterString(adhocFilters);
       if (tags && tags.length) {
-        query += ',';
+        query += tags.join(',');
       }
-      query += adhocTags;
-    }
 
-    query += '}';
-  } else {
-    query += '{*}';
-  }
+      if (adhocFilters && adhocFilters.length) {
+        var adhocTags = buildAdHocFilterString(adhocFilters);
 
-  if (target.as) {
-    query += '.' + target.as + '()';
-  }
+        if (tags && tags.length) {
+          query += ',';
+        }
 
-  var groupedFuncs = _lodash2.default.groupBy(functionInstances, function (func) {
-    if (func.def.append) {
-      return 'appends';
+        query += adhocTags;
+      }
+
+      query += '}';
     } else {
-      return 'wraps';
+      query += '{*}';
     }
-  });
 
-  _lodash2.default.each(groupedFuncs.appends, function (func) {
-    query += '.' + func.render();
-  });
+    if (target.groups) {
+      var groups = target.groups.split(",");
+      query += ' by {';
 
-  _lodash2.default.each(groupedFuncs.wraps, function (func) {
-    query = func.render(query);
-  });
+      for (var i = 0; i < groups.length; ++i) {
+        query += groups[i];
 
-  return query;
-}
+        if (i !== groups.length - 1) {
+          query += ',';
+        }
+      }
 
-function getFunctionInstances(functions) {
-  return _lodash2.default.map(functions, function (func) {
-    var f = _dfunc2.default.createFuncInstance(func.funcDef, { withDefaultParams: false });
-    f.params = func.params.slice();
-    return f;
-  });
-}
+      query += '}';
+    }
 
-function buildAdHocFilterString(adhocFilters) {
-  return adhocFilters.map(function (filter) {
-    return filter.key + ':' + filter.value;
-  }).join(',');
-}
+    if (target.as) {
+      query += '.' + target.as + '()';
+    }
+
+    var groupedFuncs = _.groupBy(functionInstances, function (func) {
+      if (func.def.append) {
+        return 'appends';
+      } else {
+        return 'wraps';
+      }
+    });
+
+    _.each(groupedFuncs.appends, function (func) {
+      query += '.' + func.render();
+    });
+
+    _.each(groupedFuncs.wraps, function (func) {
+      query = func.render(query);
+    });
+
+    return query;
+  }
+
+  _export('buildQuery', buildQuery);
+
+  function getFunctionInstances(functions) {
+    return _.map(functions, function (func) {
+      var f = dfunc.createFuncInstance(func.funcDef, {
+        withDefaultParams: false
+      });
+      f.params = func.params.slice();
+      return f;
+    });
+  }
+
+  function buildAdHocFilterString(adhocFilters) {
+    return adhocFilters.map(function (filter) {
+      return filter.key + ':' + filter.value;
+    }).join(',');
+  }
+
+  return {
+    setters: [function (_lodash) {
+      _ = _lodash["default"];
+    }, function (_dfunc) {
+      dfunc = _dfunc["default"];
+    }],
+    execute: function execute() {}
+  };
+});
 //# sourceMappingURL=query_builder.js.map
