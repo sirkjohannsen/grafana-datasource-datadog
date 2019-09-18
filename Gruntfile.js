@@ -1,32 +1,14 @@
-//
-//  Copyright 2018 Draios Inc.
-//
-//  Licensed under the Apache License, Version 2.0 (the "License");
-//  you may not use this file except in compliance with the License.
-//  You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-//  Unless required by applicable law or agreed to in writing, software
-//  distributed under the License is distributed on an "AS IS" BASIS,
-//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-//  See the License for the specific language governing permissions and
-//  limitations under the License.
-//
-const fs = require('fs');
-
 module.exports = function(grunt) {
 
   require('load-grunt-tasks')(grunt);
 
   grunt.loadNpmTasks('grunt-execute');
   grunt.loadNpmTasks('grunt-contrib-clean');
-
-  const version = fs.readFileSync('VERSION').toString();
+  grunt.loadNpmTasks('grunt-contrib-watch');
 
   grunt.initConfig({
 
-    clean: ['dist'],
+    clean: ["dist"],
 
     copy: {
       src_to_dist: {
@@ -35,6 +17,18 @@ module.exports = function(grunt) {
         src: ['**/*', '!**/*.js', '!**/*.scss'],
         dest: 'dist'
       },
+      vendor_to_dist: {
+        cwd: 'vendor',
+        expand: true,
+        src: ['**/*'],
+        dest: 'dist'
+      },
+      vendor_to_test: {
+        cwd: 'vendor',
+        expand: true,
+        src: ['**/*'],
+        dest: 'dist/test'
+      },
       pluginDef: {
         expand: true,
         src: ['README.md'],
@@ -42,32 +36,10 @@ module.exports = function(grunt) {
       }
     },
 
-    replace: {
-      dist: {
-        options: {
-          patterns: [
-            {
-              json: {
-                version
-              }
-            }
-          ]
-        },
-        files: [
-          {
-            expand: true,
-            flatten: true,
-            src: ['src/plugin.json'], 
-            dest: 'dist/'
-          }
-        ]
-      }
-    },
-
     watch: {
       rebuild_all: {
         files: ['src/**/*'],
-        tasks: ['default'],
+        tasks: ['watchTask'],
         options: {spawn: false}
       }
     },
@@ -75,7 +47,7 @@ module.exports = function(grunt) {
     babel: {
       options: {
         sourceMap: true,
-        presets:  ['@babel/preset-env', '@babel/react']
+        presets:  ['es2015']
       },
       dist: {
         options: {
@@ -107,8 +79,66 @@ module.exports = function(grunt) {
           ext:'.js'
         }]
       }
+    },
+
+    jshint: {
+      source: {
+        files: {
+          src: ['src/**/*.js'],
+        }
+      },
+      options: {
+        jshintrc: true,
+        reporter: require('jshint-stylish'),
+        ignores: [
+          'node_modules/*',
+          'dist/*',
+        ]
+      }
+    },
+
+    jscs: {
+      src: ['src/**/*.js'],
+      options: {
+        config: ".jscs.json",
+      },
+    },
+
+    mochaTest: {
+      test: {
+        options: {
+          reporter: 'spec'
+        },
+        src: [
+          'dist/test/spec/test-main.js',
+          'dist/test/spec/*_spec.js'
+        ]
+      }
     }
+
   });
 
-  grunt.registerTask('default', ['clean', 'copy:src_to_dist', 'copy:pluginDef', 'replace', 'babel']);
+  grunt.registerTask('default', [
+    'clean',
+    'copy:src_to_dist',
+    'copy:pluginDef',
+    'jshint',
+    'jscs',
+    'babel',
+    'copy:vendor_to_dist',
+    'copy:vendor_to_test',
+    'mochaTest'
+  ]);
+
+  grunt.registerTask('dev', ['default', 'watch']);
+
+  grunt.registerTask('watchTask', [
+    // 'clean',
+    'copy:src_to_dist',
+    'copy:pluginDef',
+    'babel',
+    'copy:vendor_to_dist',
+    'jshint',
+    'jscs'
+  ]);
 };

@@ -36,9 +36,9 @@ System.register(['lodash', './dfunc'], function (_export, _context) {
     }
 
     if (target.groups) {
-      let groups = target.groups.split(",");
+      var groups = target.groups.split(",");
       query += ' by {';
-      for (let i = 0; i < groups.length; ++i) {
+      for (var i = 0; i < groups.length; ++i) {
         query += groups[i];
         if (i !== groups.length - 1) {
           query += ',';
