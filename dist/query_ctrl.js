@@ -89,11 +89,7 @@ System.register(['lodash', './dfunc', 'app/plugins/sdk', './func_editor', './add
           if (_this.target.metric) {
             _this.metricSegment = new uiSegmentSrv.newSegment(_this.target.metric);
           } else {
-            _this.metricSegment = new uiSegmentSrv.newSegment({
-              value: 'Select Metric',
-              fake: true,
-              custom: false
-            });
+            _this.metricSegment = new uiSegmentSrv.newSelectMetric();
           }
 
           _this.target.tags = _this.target.tags || [];
@@ -125,8 +121,14 @@ System.register(['lodash', './dfunc', 'app/plugins/sdk', './func_editor', './add
           key: 'toggleEditorMode',
           value: function toggleEditorMode() {
             this.target.rawQuery = !this.target.rawQuery;
-            if (this.target.rawQuery)
+            if (this.target.rawQuery) {
+              console.log('Printing target in toggleEditorMode: \n')
+              console.log(this.target);
               this.target.query = queryBuilder.buildQuery(this.target);
+            } else {
+              this.parseQuery();
+            }
+              
           }
         }, {
           key: 'getCollapsedText',
@@ -144,6 +146,116 @@ System.register(['lodash', './dfunc', 'app/plugins/sdk', './func_editor', './add
             // to avoid 400 Bad Request, this is the default query
               this.target.query = 'undefined:undefined{*}';
             this.panelCtrl.refresh();
+          }
+        }, {
+          key: 'parseQuery',
+          value: function parseQuery() {
+            
+            // sample query
+            // derivative(count_not_null(avg:aws.autoscaling.group_in_service_instances{*} by {name,team}.as_count()))
+            // derivative(abs(undefined:undefined{*}))
+            console.log("Inside parseQuery: " + this.target.query + "\n");
+            console.log('Printing target: \n');
+            console.log(this.target);
+            var stack = [];
+            var query = this.target.query;
+            var tmpString = [];
+
+            if (query.indexOf('(') === -1) {
+              stack.push(query);
+            }
+
+            for (var i = 0; i < query.length; ++i) {
+              if (query[i] !== '(' && query[i] !== ')') {
+                tmpString.push(query[i]);
+              } else {
+                stack.push(tmpString.join(''));
+                tmpString = [];
+              }
+            } 
+
+            console.log(stack)
+
+            var functions = [];
+            var scopes = [];
+            var metricCollected = false;
+            var aggregation, metric, as, groups = null;
+
+            for (var component of stack) {
+              // check if it is a function
+              if (!component.includes(':') && !metricCollected) {
+                functions.push(component);
+              } else {
+                // here its could have a metric, a scope
+                // example: avg:aws.autoscaling.group_in_service_instances{*} by {name,team}.as_count
+                // and it should be the last component
+                var aggrIndex = component.indexOf(':');
+                aggregation = component.slice(0, aggrIndex);
+                console.log('Aggregation: ' + aggregation + '\n');
+
+                // process metric
+                var withNoAggr = component.slice(aggrIndex + 1);
+                var metricEnd = withNoAggr.indexOf('{');
+                metric = withNoAggr.slice(0, metricEnd);
+                console.log('Metric: ' + metric + '\n');
+                metricCollected = true;
+
+                // process scopes
+                var withNoMetric = withNoAggr.slice(metricEnd + 1);
+                var scopeEnd = withNoMetric.indexOf('}');
+                scopes = withNoMetric.slice(0, scopeEnd).trim().split(',');
+                console.log('Scopes: ' + scopes + '\n');
+
+                // process groups
+                // example: by {name,team}.as_count
+                var withNoScopes = withNoMetric.slice(scopeEnd + 1);
+                var groupStart = withNoScopes.indexOf('{');
+                if (groupStart !== -1) {
+                  // there are groups
+                  var groupEnd = withNoScopes.indexOf('}');
+                  groups = withNoScopes.slice(groupStart + 1, groupEnd);
+                  console.log('Groups: ' + groups + '\n');
+                } 
+
+                // process as
+                var asStart = withNoScopes.indexOf('.');
+                if (asStart !== -1) {
+                  as = withNoScopes.slice(asStart + 1);
+                  console.log('As: ' + as + '\n');
+                }
+                
+                if (aggregation) {
+                  this.target.aggregation = aggregation;
+                  console.log('Aggr seg: ' + this.aggregationSegment.value + '\n');
+                  this.aggregationSegment = this.uiSegmentSrv.newSegment(aggregation);
+                  //this.panelCtrl.refresh();
+                }
+
+                if (metric) {
+                  this.target.metric = metric;
+                  //this.panelCtrl.refresh();
+                  console.log('Metric seg: ' + this.metricSegment.value + '\n');
+                  this.metricSegment = this.uiSegmentSrv.newSegment({
+                    value: metric,
+                    fake: true
+                  });
+                }
+                
+                if (as) {
+                  this.target.as = as;
+                  //this.panelCtrl.refresh();
+                  console.log('AS seg: ' + this.asSegment.value + '\n');
+                  this.asSegment = this.uiSegmentSrv.newSegment(as);
+                }
+                this.targetChanged();
+                
+                
+                
+              }
+            }
+            
+            // console.log(stack);
+
           }
         }, {
           key: 'getMetrics',
