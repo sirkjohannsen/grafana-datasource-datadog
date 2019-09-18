@@ -2,16 +2,21 @@
 
 var _module = require("../module");
 
-var _q = _interopRequireDefault(require("q"));
+var _q = require("q");
 
-var _sinon = _interopRequireDefault(require("sinon"));
+var _q2 = _interopRequireDefault(_q);
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+var _sinon = require("sinon");
+
+var _sinon2 = _interopRequireDefault(_sinon);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 describe('DataDogDatasource', function () {
   var ctx = {};
+
   beforeEach(function () {
-    ctx.$q = _q["default"];
+    ctx.$q = _q2.default;
     ctx.backendSrv = {
       datasourceRequest: function datasourceRequest() {
         return ctx.$q.when({
@@ -27,6 +32,7 @@ describe('DataDogDatasource', function () {
         return [];
       }
     };
+
     var instanceSettings = {
       url: 'https://app.datadoghq.com/api/v1',
       jsonData: {
@@ -36,12 +42,11 @@ describe('DataDogDatasource', function () {
     };
     ctx.ds = new _module.Datasource(instanceSettings, ctx.backendSrv, ctx.templateSrv);
   });
+
   describe('When doing DataDog API request', function () {
     beforeEach(function () {
-      var targets = [{
-        query: 'avg:system.load.5{*}',
-        rawQuery: true
-      }];
+      var targets = [{ query: 'avg:system.load.5{*}', rawQuery: true }];
+
       ctx.options = {
         range: {
           from: 12340000,
@@ -50,6 +55,7 @@ describe('DataDogDatasource', function () {
         targets: targets
       };
     });
+
     it('should send request with proper params', function (done) {
       var expected_params = {
         method: 'GET',
@@ -62,8 +68,7 @@ describe('DataDogDatasource', function () {
           query: 'avg:system.load.5{*}'
         }
       };
-
-      var datasourceRequest = _sinon["default"].spy(ctx.ds.backendSrv, 'datasourceRequest');
+      var datasourceRequest = _sinon2.default.spy(ctx.ds.backendSrv, 'datasourceRequest');
 
       ctx.ds.query(ctx.options);
       expect(datasourceRequest).to.have.been.calledWith(expected_params);
