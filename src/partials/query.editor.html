@@ -1,7 +1,7 @@
 <query-editor-row query-ctrl="ctrl" has-text-edit-mode="true" can-collapse="true">
 
   <div class="gf-form" ng-if="ctrl.target.rawQuery">
-    <input type="text" class="gf-form-input" ng-model="ctrl.target.query" spellcheck="false" ng-blur="ctrl.refresh()"></input>
+    <input type="text" class="gf-form-input" ng-model="ctrl.target.query" spellcheck="false" ng-blur="ctrl.checkQuery()"></input>
   </div>
 
   <div ng-if="!ctrl.target.rawQuery">
@@ -21,7 +21,7 @@
       </div>
 
       <div class="gf-form gf-form--grow">
-        <div class="gf-form-label gf-form-label--grow"></div>
+        <div class="gf-form-label gf-form-label--grow"></div> 
       </div>
     </div>
 
@@ -54,6 +54,17 @@
         <div class="gf-form-label gf-form-label--grow"></div>
       </div>
 
+    </div>
+
+    <div class="gf-form-inline">
+      <div class="gf-form max-width-30">
+        <label class="gf-form-label query-keyword width-7">GROUP BY</label>
+        <input type="text" class="gf-form-input" ng-model="ctrl.target.groups" spellcheck='false' placeholder="Tags (separate by comma)" ng-blur="ctrl.refresh()">
+      </div>
+
+      <div class="gf-form gf-form--grow">
+        <div class="gf-form-label gf-form-label--grow"></div>
+      </div>
     </div>
 
     <div class="gf-form-inline">

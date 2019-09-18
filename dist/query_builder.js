@@ -35,6 +35,18 @@ System.register(['lodash', './dfunc'], function (_export, _context) {
       query += '{*}';
     }
 
+    if (target.groups) {
+      var groups = target.groups.split(",");
+      query += ' by {';
+      for (var i = 0; i < groups.length; ++i) {
+        query += groups[i];
+        if (i !== groups.length - 1) {
+          query += ',';
+        }
+      }
+      query += '}';
+    }
+
     if (target.as) {
       query += '.' + target.as + '()';
     }
@@ -54,7 +66,7 @@ System.register(['lodash', './dfunc'], function (_export, _context) {
     _.each(groupedFuncs.wraps, function (func) {
       query = func.render(query);
     });
-
+  
     return query;
   }
 
