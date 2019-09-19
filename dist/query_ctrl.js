@@ -126,7 +126,7 @@ System.register(['lodash', './dfunc', 'app/plugins/sdk', './func_editor', './add
               console.log(this.target);
               this.target.query = queryBuilder.buildQuery(this.target);
             } else {
-              this.parseQuery();
+              this.reverseConstructSegs();
             }
               
           }
@@ -146,6 +146,35 @@ System.register(['lodash', './dfunc', 'app/plugins/sdk', './func_editor', './add
             // to avoid 400 Bad Request, this is the default query
               this.target.query = 'undefined:undefined{*}';
             this.panelCtrl.refresh();
+          }
+        }, {
+          key: 'reverseConstructSegs',
+          value: function reverseConstructSegs() {
+            var aggregation, metric, as, scopes, functions, groups = this.parseQuery();
+            if (aggregation) {
+              this.target.aggregation = aggregation;
+              console.log('Aggr seg: ' + this.aggregationSegment.value + '\n');
+              this.aggregationSegment = this.uiSegmentSrv.newSegment(aggregation);
+              //this.panelCtrl.refresh();
+            }
+
+            if (metric) {
+              this.target.metric = metric;
+              //this.panelCtrl.refresh();
+              console.log('Metric seg: ' + this.metricSegment.value + '\n');
+              this.metricSegment = this.uiSegmentSrv.newSegment({
+                value: metric,
+                fake: true
+              });
+            }
+            
+            if (as) {
+              this.target.as = as;
+              //this.panelCtrl.refresh();
+              console.log('AS seg: ' + this.asSegment.value + '\n');
+              this.asSegment = this.uiSegmentSrv.newSegment(as);
+            }
+            this.targetChanged();
           }
         }, {
           key: 'parseQuery',
@@ -222,40 +251,10 @@ System.register(['lodash', './dfunc', 'app/plugins/sdk', './func_editor', './add
                 if (asStart !== -1) {
                   as = withNoScopes.slice(asStart + 1);
                   console.log('As: ' + as + '\n');
-                }
-                
-                if (aggregation) {
-                  this.target.aggregation = aggregation;
-                  console.log('Aggr seg: ' + this.aggregationSegment.value + '\n');
-                  this.aggregationSegment = this.uiSegmentSrv.newSegment(aggregation);
-                  //this.panelCtrl.refresh();
-                }
-
-                if (metric) {
-                  this.target.metric = metric;
-                  //this.panelCtrl.refresh();
-                  console.log('Metric seg: ' + this.metricSegment.value + '\n');
-                  this.metricSegment = this.uiSegmentSrv.newSegment({
-                    value: metric,
-                    fake: true
-                  });
-                }
-                
-                if (as) {
-                  this.target.as = as;
-                  //this.panelCtrl.refresh();
-                  console.log('AS seg: ' + this.asSegment.value + '\n');
-                  this.asSegment = this.uiSegmentSrv.newSegment(as);
-                }
-                this.targetChanged();
-                
-                
-                
+                }  
               }
             }
-            
-            // console.log(stack);
-
+            return aggregation, metric, as, scopes, functions, groups;
           }
         }, {
           key: 'getMetrics',
