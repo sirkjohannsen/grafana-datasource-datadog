@@ -43,7 +43,7 @@
     "sinon-chai": "~2.8.0"
   },
   "dependencies": {
-    "lodash": "~4.0.0"
+    "lodash": "~4.17.19"
   },
   "homepage": "https://github.com/voidfiles/grafana-datasource-datagog/issues"
 }
